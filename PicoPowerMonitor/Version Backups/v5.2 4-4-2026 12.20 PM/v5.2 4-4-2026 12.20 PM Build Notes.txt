@@ -1,0 +1,123 @@
+This version will auto connect on any COM port the RP2040-Zero is connected to.
+
+added
+var selected = m.Groups[1].Value;
+to the if (m.Success) section.
+
+Build
+Debug Output:
+Found device: USB Serial Port (COM8) with Hardware ID: FTDIBUS\VID_0403+PID_6001+FTF7J6TJA\0000
+Found device: USB Serial Device (COM7) with Hardware ID: USB\VID_2E8A&PID_0005&MI_00\6&D009CD&0&0000
+AutoDetectPico If Statement True
+m variable contains: (COM7)
+Pico detected: USB Serial Device (COM7), extracting port...
+selected variable contains: COM7
+m.Group[1].Value is: COM7
+
+********************************************************************************
+With selected now containing the string COM8, I should be able to Uncomment 
+            // Debug.WriteLine("AutoConnect function called...");
+            // AutoConnect();
+            // Debug.WriteLine("AutoConnect returned to Main.");
+From MainWindow()
+
+********************************************************************************
+Build with Monitor connected.  Should just connect I believe.
+It does.
+
+
+Still does not work correctly when the app is launched and there is a 2nd COM port on the system.
+It mistakenly connects to the 1st device it finds. I this case a USB to Serial adapter on COM8
+Screenshots taken.
+
+Debug output during this test.
+Launch app without the Pico connected but there is some other COM port on the system.
+
+Found device: USB Serial Port (COM8) with Hardware ID: FTDIBUS\VID_0403+PID_6001+FTF7J6TJA\0000
+AutoDetectPico returned to Main...
+string.IsNullOrEmpty(_targetPort), Pico detected on  during initialization.
+Main setting up new DispatchTimer
+Main done setting up new DispatchTimer
+AutoConnect function called...
+AutoConnect Function called...
+AutoConnect if string evaluated true
+Pico just detected on . Selected: COM8
+Pico just detected on COM8. Selected: COM8
+_reconnectTimer Started
+Calling TryConnect()
+TryConnect() started
+Calling ClosePort()
+Returned from ClosePort()
+Opening _picoPort Communications
+Changing to Connected status on COM8
+Exiting TryConnect()
+AutoConnect returned to Main.
+ReconnectTimer_Tick called...
+
+********************************************************************************
+Launching the app with NO COM ports available.
+App runs, no issues.
+
+Debug:
+MainWindow initialized.
+Main Calls LoadPorts...
+LoadPorts called...
+Available COM ports: 
+LoadPorts ports.Length is: 0
+LoadPorts returned to Main...
+Main Calls AutoDetectPico...
+Attempting to auto-detect Pico...
+AutoDetectPico returned to Main...
+string.IsNullOrEmpty(_targetPort), Pico detected on  during initialization.
+Main setting up new DispatchTimer
+Main done setting up new DispatchTimer
+AutoConnect function called...
+AutoConnect Function called...
+AutoConnect returned to Main.
+
+Connect the Pico and 2nd COM port to the PC
+No Debug output
+
+Screenshot stating 12:40 PM
+Select "Select Port" drop-down box
+Button goes gray
+No debug output, I don't have any configured.
+
+Select Refresh
+Select Port button return with its Text "Select Port" and Drop-down arrow.
+No Debug Output
+
+Press Select Port
+Goes gray again.
+No Debug Output
+
+Refresh brings it back.
+This time with COM8 displayed
+And some debug output:
+Available COM ports: COM8, COM7
+LoadPorts ports.Length is: 2
+
+Select Port drop-down and both COM8 and COM7 are listed
+No debug output
+
+Select COM7
+No debug output
+
+Select Connect
+Works, I have Pico output.
+Debug Output
+
+ConnectButton_Click called...
+ConnectButton_Click if selected is NOT Null or Empty evaluated True
+ConnectButton_Click COM7. Selected: COM7
+ConnectButton_Click Starting _reconnectTimer
+ConnectButton_Click calling TryConnect()
+TryConnect() started
+Calling ClosePort()
+Returned from ClosePort()
+Opening _picoPort Communications
+Changing to Connected status on COM7
+Exiting TryConnect()
+ReconnectTimer_Tick called...
+ReconnectTimer_Tick called...
+ReconnectTimer_Tick called...

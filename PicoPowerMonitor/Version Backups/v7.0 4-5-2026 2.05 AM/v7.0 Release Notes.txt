@@ -1,0 +1,60 @@
+4/5/2026 2:00 AM
+
+
+Finally to the Window to launch and be the correct size, not this default giant windows that I had to resize every time.
+
+            // in constructor, after InitializeComponent()
+            if (Content is FrameworkElement root)
+            {
+                Debug.WriteLine("Content is FrameworkElement root...");
+                root.Loaded += (s, e) => AdjustWindowToContent();
+            }
+
+
+        // Measure content and resize/center the window at runtime (WinUI 3)
+        private void AdjustWindowToContent()
+        {
+            if (Content is FrameworkElement root)
+            {
+                // allow the content to measure itself unconstrained
+                root.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+                double desiredW = root.DesiredSize.Width;
+                double desiredH = root.DesiredSize.Height;
+
+                // enforce sensible minimums (previously in XAML)
+                const int minW = 300;
+                const int minH = 160;
+
+                // convert to integer pixel sizes for AppWindow
+                int newW = Math.Max((int)Math.Ceiling(desiredW), minW);
+                int newH = Math.Max((int)Math.Ceiling(desiredH), minH);
+
+                try
+                {
+                    // center and resize using AppWindow APIs (WinUI)
+                    var hwnd = WindowNative.GetWindowHandle(this);
+                    var windowId = Win32Interop.GetWindowIdFromWindow(hwnd);
+                    var appWindow = AppWindow.GetFromWindowId(windowId);
+
+                    // Resize the window via AppWindow (Window doesn't expose Width/Height in WinUI 3)
+                    appWindow.Resize(new Windows.Graphics.SizeInt32(newW, newH));
+
+                    var displayArea = DisplayArea.GetFromWindowId(windowId, DisplayAreaFallback.Primary);
+                    var work = displayArea.WorkArea;
+                    int x = work.X + (work.Width - newW) / 2;
+                    int y = work.Y + (work.Height - newH) / 2;
+
+                    appWindow.Move(new Windows.Graphics.PointInt32(x, y));
+                }
+                catch
+                {
+                    // ignore if AppWindow APIs not available or call fails
+                }
+            }
+        }
+
+
+        // Helper to get the DPI for the current window, used for scaling the UI appropriately on high-DPI displays.
+        [System.Runtime.InteropServices.DllImport("User32.dll")]
+        public static extern int getDpiForWindow(IntPtr hwnd);
+    }

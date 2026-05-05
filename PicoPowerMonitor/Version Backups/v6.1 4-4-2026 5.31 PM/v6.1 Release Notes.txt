@@ -1,0 +1,157 @@
+Commented out the UI backend in my xaml.cs file
+Compiler started the throw errors
+
+It's all sorted out now.
+
+Also was trying to resize the main windows on launch, Copilot steered me wrong first go by giving me command the didn't work with WinUI 3.
+
+So that UI sizing didn't make it to this version.
+
+********************************************************************************
+Asked Copilot
+Is it possible to configure the UI window to be just the heigth and width needed to diplay the elements in it?
+
+Response: Turns out this does not work in WinUI 3 only WPF.
+
+Yes. Set the Window's SizeToContent so the window sizes itself to its children. Example changes to MainWindow.xaml:
+
+<Window
+    x:Class="PicoPowerMonitor.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:PicoPowerMonitor"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Title="Pico Power Monitor"
+    SizeToContent="WidthAndHeight"
+    WindowStartupLocation="CenterScreen"
+    MinWidth="300"
+    MinHeight="160">
+
+Notes / gotchas
+•	SizeToContent values: Width, Height, WidthAndHeight, or Manual.
+•	If you want to prevent the user from resizing the window after it sizes to content, set ResizeMode="NoResize".
+•	Use MinWidth/MinHeight to avoid the window becoming too small when content is minimal.
+•	Dynamic content changes will automatically update the window size while SizeToContent is active.
+
+********************************************************************************
+Adding these lines just under the Title in MainWindow.xaml file.
+    SizeToContent="WidthAndHeight"
+    WindowStartupLocation="CenterScreen"
+    MinWidth="300"
+    MinHeight="160">
+
+VSC has 4 Errors.
+
+********************************************************************************
+Asking Copilot
+Can you see what I did wrong, I have 4 errors now?
+
+Response:
+You added WPF-only window attributes to a WinUI 3 window. WinUI 3 Window doesn't support SizeToContent or WindowStartupLocation (and some of the other attributes you added), which causes the XAML errors.
+Quick fixes
+•	Remove SizeToContent="WidthAndHeight" and WindowStartupLocation="CenterScreen" from MainWindow.xaml.
+•	Set an explicit Width/Height in XAML (or compute them in code) and keep MinWidth/MinHeight only if they compile in your WinUI target.
+If you want the window to size to its content at runtime, do it in code-behind. Example (MainWindow.xaml.cs):
+`public MainWindow() { this.InitializeComponent();
+
+// Measure content and resize window to fit
+var root = (Microsoft.UI.Xaml.FrameworkElement)Content;
+root.Measure(new Windows.Foundation.Size(double.PositiveInfinity, double.PositiveInfinity));
+this.Width = root.DesiredSize.Width;
+this.Height = root.DesiredSize.Height;
+
+}`
+If you also want to center the window, use the Windows AppWindow API (WinUI) after obtaining the window handle; that's more code but avoids unsupported XAML attributes.
+
+********************************************************************************
+Removing the 4 line I just added
+    SizeToContent="WidthAndHeight"
+    WindowStartupLocation="CenterScreen"
+    MinWidth="300"
+    MinHeight="160">
+
+Then wants me to add this procedure and call
+Put the call just after
+public MainWindow()
+{
+    this.InitializeComponent();
+
+********************************************************************************	
+            // Adjust window to content once loaded (WinUI does not support SizeToContent in XAML)
+            this.Loaded += (s, e) => AdjustWindowToContent();
+
+        // Measure content and resize/center the window at runtime (WinUI 3)
+        private void AdjustWindowToContent()
+        {
+            if (Content is FrameworkElement root)
+            {
+                // allow the content to measure itself unconstrained
+                root.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+                double desiredW = root.DesiredSize.Width;
+                double desiredH = root.DesiredSize.Height;
+
+                // enforce sensible minimums (previously in XAML)
+                const double minW = 300;
+                const double minH = 160;
+                this.Width = Math.Max(desiredW, minW);
+                this.Height = Math.Max(desiredH, minH);
+
+                try
+                {
+                    // center using AppWindow APIs
+                    var hwnd = WindowNative.GetWindowHandle(this);
+                    var windowId = Win32Interop.GetWindowIdFromWindow(hwnd);
+                    var appWindow = AppWindow.GetFromWindowId(windowId);
+
+                    var displayArea = DisplayArea.GetFromWindowId(windowId, DisplayAreaFallback.Primary);
+                    var work = displayArea.WorkArea;
+                    int x = work.X + (work.Width - (int)this.Width) / 2;
+                    int y = work.Y + (work.Height - (int)this.Height) / 2;
+
+                    appWindow.Move(new Windows.Graphics.PointInt32(x, y));
+                }
+                catch
+                {
+                    // ignore if AppWindow APIs not available or call fails
+                }
+            }
+        }
+********************************************************************************
+I haven't changed anything in the MainWindow.xaml.cs file and now I have 4 errors
+They all have to do with PortSelector?  WTF
+
+Severity	Code	Description	Project	File	Line	Suppression State
+Error (active)	CS0103	The name 'PortSelector' does not exist in the current context	PicoPowerMonitor	C:\Source\PicoPowerMonitor\PicoPowerMonitor\MainWindow.xaml.cs	92	
+
+Severity	Code	Description	Project	File	Line	Suppression State
+Error (active)	CS0103	The name 'PortSelector' does not exist in the current context	PicoPowerMonitor	C:\Source\PicoPowerMonitor\PicoPowerMonitor\MainWindow.xaml.cs	94	
+
+Severity	Code	Description	Project	File	Line	Suppression State
+Error (active)	CS0103	The name 'PortSelector' does not exist in the current context	PicoPowerMonitor	C:\Source\PicoPowerMonitor\PicoPowerMonitor\MainWindow.xaml.cs	95	
+
+Severity	Code	Description	Project	File	Line	Suppression State
+Error (active)	CS0103	The name 'PortSelector' does not exist in the current context	PicoPowerMonitor	C:\Source\PicoPowerMonitor\PicoPowerMonitor\MainWindow.xaml.cs	212	
+
+********************************************************************************
+Copilot says it's because I removed the Port Selection StackPanel.
+Why it built a little while ago without error, that's a good question.
+
+Copilot says " if you don't want UI controls, remove all uses of PortSelector from the C# file instead."
+
+Commenting out all 4 lines that make reference to the PortSelector.
+Lines:
+92	if (PortSelector != null)
+94	PortSelector.ItemsSource = ports;
+95	if (ports.Length > 0) PortSelector.SelectedIndex = 0;
+212	var selected = PortSelector?.SelectedItem?.ToString();
+
+Now selected is gone, have to remark the entire procedure ConnectButton_Click
+No more errors.
+
+********************************************************************************
+Comment out RefreshPorts_Click procedure.
+
+6:30 PM
+Saving as v6.1

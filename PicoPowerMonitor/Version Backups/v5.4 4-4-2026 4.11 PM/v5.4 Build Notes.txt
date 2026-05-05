@@ -1,0 +1,112 @@
+4/4/2026
+4:16 PM
+
+This version start the dispatch timer regardless if the Pico is connected or not.
+
+
+
+Now I have to deal with starting this DispatchTimer, no matter what is connected.
+I see what needs to be done.
+
+********************************************************************************
+AutoConnect function starts the timer and it's configured to only start if selected is not Null or Empty.
+private void AutoConnect(string? selected)
+{
+	if (!string.IsNullOrEmpty(selected))
+	{
+		_reconnectTimer.Start();
+	}
+    Debug.WriteLine("AutoConnect if string evaluated false");
+}
+
+Should be able to add these lines in the else case.
+    else
+    {
+		// Didn't find a Pico on any COM port.  Start the reconnect timer and keep trying.
+        Debug.WriteLine("AutoConnect if string evaluated false");
+        _reconnectTimer.Start();
+        Debug.WriteLine("_reconnectTimer Started");
+    }
+}
+	
+4:07 PM
+Build
+Just Serial to USB connected to PC
+4:08 Printscreen
+4:09 Connected Pico, worked like a champ.
+	Connected to COM7, no issues.
+	
+Saving as 5.4
+"C:\Source\PicoPowerMonitor\PicoPowerMonitor\Version Backups\v5.4 4-4-2026 4.11 PM"
+
+
+Debug Output:
+MainWindow initialized.
+Main Calls LoadPorts...
+LoadPorts called...
+Available COM ports: COM8
+LoadPorts ports.Length is: 1
+LoadPorts returned to Main...
+Main Calls AutoDetectPico...
+Attempting to auto-detect Pico...
+The thread 75084 has exited with code 0 (0x0).
+Found device: USB Serial Port (COM8) with Hardware ID: FTDIBUS\VID_0403+PID_6001+FTF7J6TJA\0000
+AutoDetectPico returned to Main...
+AutoDetectPico returned value: 
+Main setting up new DispatchTimer
+Main done setting up new DispatchTimer
+AutoConnect function called, passing it the value: 
+AutoConnect Function called...
+AutoConnect if string evaluated false
+_reconnectTimer Started
+AutoConnect returned to Main.
+ReconnectTimer_Tick called...
+Attempting to auto-detect Pico...
+The thread 34276 has exited with code 0 (0x0).
+Found device: USB Serial Port (COM8) with Hardware ID: FTDIBUS\VID_0403+PID_6001+FTF7J6TJA\0000
+ReconnectTimer_Tick Setting StatusText to (Plug it in now)
+ReconnectTimer_Tick called...
+Attempting to auto-detect Pico...
+The thread 39788 has exited with code 0 (0x0).
+Found device: USB Serial Port (COM8) with Hardware ID: FTDIBUS\VID_0403+PID_6001+FTF7J6TJA\0000
+ReconnectTimer_Tick Setting StatusText to (Plug it in now)
+ReconnectTimer_Tick called...
+Attempting to auto-detect Pico...
+The thread 77428 has exited with code 0 (0x0).
+Found device: USB Serial Port (COM8) with Hardware ID: FTDIBUS\VID_0403+PID_6001+FTF7J6TJA\0000
+ReconnectTimer_Tick Setting StatusText to (Plug it in now)
+ReconnectTimer_Tick called...
+Attempting to auto-detect Pico...
+Found device: USB Serial Port (COM8) with Hardware ID: FTDIBUS\VID_0403+PID_6001+FTF7J6TJA\0000
+ReconnectTimer_Tick Setting StatusText to (Plug it in now)
+ReconnectTimer_Tick called...
+Attempting to auto-detect Pico...
+The thread 78096 has exited with code 0 (0x0).
+Found device: USB Serial Port (COM8) with Hardware ID: FTDIBUS\VID_0403+PID_6001+FTF7J6TJA\0000
+ReconnectTimer_Tick Setting StatusText to (Plug it in now)
+ReconnectTimer_Tick called...
+Attempting to auto-detect Pico...
+The thread 78132 has exited with code 0 (0x0).
+Found device: USB Serial Port (COM8) with Hardware ID: FTDIBUS\VID_0403+PID_6001+FTF7J6TJA\0000
+ReconnectTimer_Tick Setting StatusText to (Plug it in now)
+ReconnectTimer_Tick called...
+	********** Here is when I connect the Pico ***************
+Attempting to auto-detect Pico...
+The thread 13908 has exited with code 0 (0x0).
+Found device: USB Serial Port (COM8) with Hardware ID: FTDIBUS\VID_0403+PID_6001+FTF7J6TJA\0000
+Found device: USB Serial Device (COM7) with Hardware ID: USB\VID_2E8A&PID_0005&MI_00\6&D009CD&0&0000
+AutoDetectPico If Statement True
+m variable contains: (COM7)
+Pico detected: USB Serial Device (COM7), extracting port...
+selected variable contains: COM7
+m.Group[1].Value is: COM7
+Pico found on COM7. Attempting to connect...
+ReconnectTimer_Tick calling TryConnect()
+TryConnect() started
+Calling ClosePort()
+Returned from ClosePort()
+Opening _picoPort Communications
+Changing to Connected status on COM7
+Exiting TryConnect()
+ReconnectTimer_Tick called...
+ReconnectTimer_Tick called...

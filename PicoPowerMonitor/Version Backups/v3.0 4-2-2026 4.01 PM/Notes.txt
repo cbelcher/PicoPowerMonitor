@@ -1,0 +1,7 @@
+Adds disconnection detection and re-connection of com port.
+
+
+Key Improvements:
+1. Automatic Recovery: If you unplug the Pico, the DataReceived event will eventually fail. The catch block calls ClosePort(), and the ReconnectTimer will start looking for the Pico again every 2 seconds. [29]
+2. Clean State Management: The ClosePort() helper ensures that we don't leave "ghost" port instances open, which can cause "Access Denied" errors when trying to reconnect. [28]
+3. Visual Feedback: The StatusText now turns Orange when it's searching for your device and Green once it successfully re-establishes the stream. 

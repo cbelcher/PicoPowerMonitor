@@ -1,0 +1,105 @@
+4/6/2026
+12:40 PM
+This set of file is confirmed to auto-connect the app to the RP2040-Zero if it is connected.
+
+
+Have not tested if/what happens if the app is started and the devices is connected after the fact.
+
+Debug Output Console Window during test.
+Start App with RP2040 connected.
+
+MainWindow initialized.
+Main Calls LoadPorts...
+LoadPorts called...
+Available COM ports: COM7
+LoadPorts returned to Main...
+
+Main Calls AutoDetectPico...
+Attempting to auto-detect Pico...
+The thread 45804 has exited with code 0 (0x0).
+Found device: USB Serial Device (COM7) with Hardware ID: USB\VID_2E8A&PID_0005&MI_00\6&D009CD&0&0000
+AutoDetectPico If Statement True
+Pico detected: USB Serial Device (COM7), extracting port...
+Regex.Match(caption): (COM7)
+
+AutoDetectPico returned to Main...
+
+string.IsNullOrEmpty(_targetPort), Pico detected on  during initialization.
+
+Main setting up new DispatchTimer
+Main done setting up new DispatchTimer
+
+AutoConnect function called...
+AutoConnect Function called...
+AutoConnect if string evaluated true
+Pico just detected on . Selected: COM7
+Pico just detected on COM7. Selected: COM7
+_reconnectTimer Started
+Calling TryConnect()
+
+TryConnect() started
+Calling ClosePort()
+Returned from ClosePort()
+Opening _picoPort Communications
+Changing to Connected status on COM7
+Exiting TryConnect()
+AutoConnect returned to Main.
+ReconnectTimer_Tick called...
+ReconnectTimer_Tick called...
+
+********************************************************************************
+
+Flow Notes
+
+1. Main calls LoadPorts()
+LoadPorts called...
+Available COM ports: COM7
+LoadPorts returned to Main...
+
+2. Main Calls AutoDetectPico()
+	Output:
+	Attempting to auto-detect Pico...
+	The thread 45804 has exited with code 0 (0x0).
+	Found device: USB Serial Device (COM7) with Hardware ID: USB\VID_2E8A&PID_0005&MI_00\6&D009CD&0&0000
+	AutoDetectPico If Statement True
+	Pico detected: USB Serial Device (COM7), extracting port...
+	Regex.Match(caption): (COM7)
+AutoDetectPico returned to Main...
+Returns to Main
+
+3. Debug.WriteLine($"string.IsNullOrEmpty(_targetPort), Pico detected on {_targetPort} during initialization.");
+	Returns: string.IsNullOrEmpty(_targetPort), Pico detected on  during initialization.
+	_targetPort still Null at this point.
+	Assigned in the AutoConnect() Function
+
+
+4. Main setting up new DispatchTimer
+	Main done setting up new DispatchTimer
+
+5. Main calls AutoConnect()
+	AutoConnect function called...
+	AutoConnect Function called...
+	AutoConnect if string evaluated true
+	Pico just detected on . Selected: COM7
+	Pico just detected on COM7. Selected: COM7
+		Start reconnectTimer, every 2 seconds it calls ReconnectTimer_Tick() function.
+	Calling TryConnect()
+
+6.	AutoConnect calls TryConnect()
+	TryConnect() started
+	Calling ClosePort()
+	Returned from ClosePort()
+	Opening _picoPort Communications
+	Changing to Connected status on COM7
+	Exiting TryConnect()
+	
+	At this point we have a working connection to the Pico
+
+7. TryConnect() returns to AutoConnect()
+
+8. AutoConnect() returns to Main()
+
+9. ReconnectTimer_Tick DispatchTimer triggers every 2 seconds for Connection status.
+
+
+********************************************************************************

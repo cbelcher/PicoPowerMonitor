@@ -1,0 +1,48 @@
+Removed Port Selection Header elements from the UI
+Changed text color, Voltage to Red and Current to Blue.
+
+Let's see what we can clean up.  Maybe try to lose the Connect, Ports and Refresh UI Button and list boxes?
+
+Just editing a couple remarks.
+
+Going to comment out these lines in the MainWindow.xaml file.  I'm trying to get rid of the Port Selection.
+            <!-- Port Selection Header -->
+            <StackPanel Orientation="Horizontal" Spacing="10">
+                <ComboBox x:Name="PortSelector" Width="150" PlaceholderText="Select Port" />
+                <Button Content="Refresh" Click="RefreshPorts_Click"/>
+                <Button Content="Connect" Click="ConnectButton_Click" Background="LightBlue"/>
+            </StackPanel>
+
+<!-- --> are used to remark in the MainWindow.xaml file.
+            <!-- Port Selection Header -->
+            <!-- <StackPanel Orientation="Horizontal" Spacing="10"> -->
+                <!-- <ComboBox x:Name="PortSelector" Width="150" PlaceholderText="Select Port" /> -->
+                <!-- <Button Content="Refresh" Click="RefreshPorts_Click"/> -->
+                <!-- <Button Content="Connect" Click="ConnectButton_Click" Background="LightBlue"/> -->
+            <!-- </StackPanel> -->
+
+********************************************************************************
+Asked Copilot
+How can I change the text color?
+
+Response:
+Set the Foreground property on the TextBlock (it takes a Brush). Examples:
+•	XAML (named color): <TextBlock x:Name="VoltageText" Text="V: -- V" FontSize="32" FontWeight="Bold" FontFamily="Consolas" Foreground="Blue"/>
+•	XAML (hex): Foreground="#FFFF0000"  // opaque red
+•	XAML (resource): Foreground="{StaticResource MyAccentBrush}"
+•	Code-behind (C#): VoltageText.Foreground = new SolidColorBrush(Colors.Red);
+Pick the approach that fits your styling strategy (inline, resource, or dynamic).
+
+Changed Voltage line to blue by adding Foreground="Blue"
+like this
+<TextBlock x:Name="VoltageText" Text="V: -- V" FontSize="32" FontWeight="Bold" FontFamily="Consolas" Foreground="Blue"/>
+
+Changed Current to Red
+<TextBlock x:Name="CurrentText" Text="I: -- A" FontSize="32" FontWeight="Bold" FontFamily="Consolas"/>
+by adding Foreground="Red"
+
+5:23 PM
+Build
+Screenshot 5:23 PM
+
+********************************************************************************

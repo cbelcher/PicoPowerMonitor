@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "PicoPowerMonitor (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "PicoPowerMonitor (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
