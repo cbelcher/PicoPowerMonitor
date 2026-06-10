@@ -1,5 +1,4 @@
-// Version 7.5 6/9/2026
-// Fixed regular expression.
+// Version 7.2 5/5/2026 Program runs but not data is displayed.
 using Microsoft.UI;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
@@ -187,12 +186,16 @@ namespace PicoPowerMonitor
         {
             try
             {
+                Debug.WriteLine("TryConnect() started");
                 if (string.IsNullOrEmpty(_targetPort)) return;
+                Debug.WriteLine("Calling ClosePort()");
                 ClosePort();
+                Debug.WriteLine("Returned from ClosePort()");
                 _picoPort = new SerialPort(_targetPort, 115200);
                 _picoPort.DtrEnable = true; // Required for Pico USB
                 _picoPort.RtsEnable = true;
                 _picoPort.DataReceived += SerialPort_DataReceived;
+                Debug.WriteLine("Opening _picoPort Communications");
                 _picoPort.Open();
 
                 if (StatusText != null)
@@ -210,6 +213,7 @@ namespace PicoPowerMonitor
 
         private void ReconnectTimer_Tick(object? sender, object e)
         {
+            Debug.WriteLine("ReconnectTimer_Tick called...");
             if (_picoPort == null || !_picoPort.IsOpen)
             {
                 string? discoveredPort = AutoDetectPico();
@@ -218,12 +222,15 @@ namespace PicoPowerMonitor
                 {
                     _targetPort = discoveredPort;
                     if (StatusText != null) StatusText.Text = $"Pico found on {_targetPort}. Connecting...";
+                    Debug.WriteLine($"Pico found on {_targetPort}. Attempting to connect...");
+                    Debug.WriteLine("ReconnectTimer_Tick calling TryConnect()");
                     TryConnect();
                 }
                 else
                 {
                     if (StatusText != null)
                     {
+                        Debug.WriteLine("ReconnectTimer_Tick Setting StatusText to (Plug it in now)");
                         StatusText.Text = "Searching for Ammeter...";
                         StatusText.Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(Windows.UI.Color.FromArgb(255, 255, 165, 0));
                     }
@@ -234,16 +241,21 @@ namespace PicoPowerMonitor
 
         private void SerialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
+            Debug.WriteLine("SerialPort_DataReceived called...");
             try
             {
                 var port = _picoPort;
                 if (port == null) return;
 
                 string line = port.ReadLine();
+                Debug.WriteLine($"String Read {line}");
+                Debug.WriteLine("Should look like: V: 1.698, I: -0.011, P: 0.010");
                 Match match = PicoRegex.Match(line);
+                Debug.WriteLine($"match: {match}");
 
                 if (match.Success)
                 {
+                    Debug.WriteLine("Match Success...");
                     string v = match.Groups[1].Value;
                     string i = match.Groups[2].Value;
                     string p = match.Groups[3].Value;
