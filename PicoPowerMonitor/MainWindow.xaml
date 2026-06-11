@@ -1,11 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Window
+<!-- v7.6 6/10/2026 it's compiles and runs -->
+<winui:Window
     x:Class="PicoPowerMonitor.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:PicoPowerMonitor"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:scottplot="using:ScottPlot.WinUI"
+    xmlns:winui="using:Microsoft.UI.Xaml"
     mc:Ignorable="d"
     Title="Pico Power Monitor">
 
@@ -14,15 +17,16 @@
     </Window.SystemBackdrop>
 
     <Grid>
-        <StackPanel Spacing="5" Padding="40" HorizontalAlignment="Center" VerticalAlignment="Center">
-            <!-- Port Selection Header -->
-            <!-- <StackPanel Orientation="Horizontal" Spacing="10"> -->
-                <!-- <ComboBox x:Name="PortSelector" Width="150" PlaceholderText="Select Port" /> -->
-                <!-- <Button Content="Refresh" Click="RefreshPorts_Click"/> -->
-                <!-- <Button Content="Connect" Click="ConnectButton_Click" Background="LightBlue"/> -->
-            <!-- </StackPanel> -->
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <!--  TitleBar  -->
+            <RowDefinition Height="*" />
+            <!--  NavigationView  -->
+        </Grid.RowDefinitions>
 
-            <!-- <Rectangle Height="2" Fill="Gray" Margin="0,10"/> -->
+        <scottplot:WinUIPlot x:Name="CurrentSignaturePlot" Grid.Row="0" />
+        
+        <StackPanel Spacing="5" Padding="40" HorizontalAlignment="Center" VerticalAlignment="Center">
 
             <TextBlock x:Name="VoltageText" Text="V: -- V" FontSize="40" FontFamily="Consolas" Foreground="Blue"/>
             <TextBlock x:Name="CurrentText" Text="I: -- A" FontSize="40" FontFamily="Consolas" Foreground="Azure"/>
@@ -31,4 +35,4 @@
             <TextBlock x:Name="StatusText" Text="Searching for Ammeter..." Foreground="Orange" Margin="0,10,0,0"/>
         </StackPanel>
     </Grid>
-</Window>
+</winui:Window>
