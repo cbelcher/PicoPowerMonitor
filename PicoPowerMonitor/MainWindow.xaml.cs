@@ -1,5 +1,5 @@
-// Version v8.0 6/11/2026 Major UI Changes.
-// Fixed regular expression.
+// Version v8.1 6/11/2026 Major UI Changes.
+// Fixed regular expression, I have cut the power reading from being sent to the pc.
 using Microsoft.UI;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
@@ -52,23 +52,19 @@ namespace PicoPowerMonitor
         // 5/5/2026 Had to change the regex to catch the negitive current values.  Updated regex to look for optional negative sign before the current value.
         // Ever since adding the MOSFET the INA Report Negitive Current when idle, need to figure out what is going on.
         // private static readonly Regex PicoRegex = new Regex(@"V:\s*([\d.]+),\s*I:\s*([\d.]+),\s*P:\s*([\d.]+)");
-        private static readonly Regex PicoRegex = new Regex(@"V:\s*([\d.-]+),\s*I:\s*([\d.-]+),\s*P:\s*([\d.-]+)");
+        // 6/11/2026 pulled the plug on the Power Monitor from sending power readings, adjustding regular expression.
+        // private static readonly Regex PicoRegex = new Regex(@"V:\s*([\d.-]+),\s*I:\s*([\d.-]+),\s*P:\s*([\d.-]+)");
+        private static readonly Regex PicoRegex = new Regex(@"V:\s*([\d.-]+),\s*I:\s*([\d.-]+)");
+
 
         public MainWindow()
         {
-
             this.InitializeComponent();
-            // Initialize ScottPlot Graph  Added 6/10/2026
+            
+            // Initialize ScottPlot Current Plot - Added 6/10/2026
             InitializeGraph();
 
             // Just setting to static size for now. Changed 6/11/2026
-            // in constructor, after InitializeComponent()
-            // if (Content is FrameworkElement root)
-            // {
-            //  Debug.WriteLine("Content is FrameworkElement root");
-            //  Debug.WriteLine("Calling AdjustWindowToContent");
-            //  root.Loaded += (s, e) => AdjustWindowToContent();
-            // }
             this.AppWindow.Resize(new Windows.Graphics.SizeInt32(650, 500));
 
             // Find the Pico's COM port automatically
@@ -91,59 +87,6 @@ namespace PicoPowerMonitor
             };
         }
 
-        // Measure content and resize/center the window at runtime (WinUI 3)
-        private void AdjustWindowToContent()
-        {
-            Debug.WriteLine("Inside AdjustWindowToContent");
-            if (Content is FrameworkElement root)
-            {
-                Debug.WriteLine("Content is FrameworkElement root");
-                // allow the content to measure itself unconstrained
-                Debug.WriteLine("Calling root.Measure");
-                root.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
-                double desiredW = root.DesiredSize.Width;
-                Debug.WriteLine($"desiredW: {desiredW}");
-                double desiredH = root.DesiredSize.Height;
-                Debug.WriteLine($"desiredH: {desiredH}");
-
-                // enforce sensible minimums (previously in XAML)
-                const int minW = 325;
-                const int minH = 160;
-
-                // convert to integer pixel sizes for AppWindow
-                int newW = Math.Max((int)Math.Ceiling(desiredW), minW);
-                Debug.WriteLine($"AppWindow Pixel Size - Width newW: {newW}");
-                int newH = Math.Max((int)Math.Ceiling(desiredH), minH);
-                Debug.WriteLine($"AppWindow Pixel Size - Height newH: {newH}");
-
-                try
-                {
-                    Debug.WriteLine("Entered try");
-                    // center and resize using AppWindow APIs (WinUI)
-                    var hwnd = WindowNative.GetWindowHandle(this);
-                    Debug.WriteLine($"hwnd: {hwnd}");
-                    var windowId = Win32Interop.GetWindowIdFromWindow(hwnd);
-                    Debug.WriteLine($"windowId: {windowId}");
-                    var appWindow = AppWindow.GetFromWindowId(windowId);
-                    Debug.WriteLine($"appWindow: {appWindow}");
-
-                    // Resize the window via AppWindow (Window doesn't expose Width/Height in WinUI 3)
-                    appWindow.Resize(new Windows.Graphics.SizeInt32(newW, newH));
-
-                    var displayArea = DisplayArea.GetFromWindowId(windowId, DisplayAreaFallback.Primary);
-                    var work = displayArea.WorkArea;
-                    int x = work.X + (work.Width - newW) / 2;
-                    int y = work.Y + (work.Height - newH) / 2;
-
-                    appWindow.Move(new Windows.Graphics.PointInt32(x, y));
-                }
-                catch
-                {
-                    // ignore if AppWindow APIs not available or call fails
-                    Debug.WriteLine("Hit catch, ingnore AppWindow APIs");
-                }
-            }
-        }
 
         // Auto-detect the Pico's COM port by looking for its unique VID/PID in the system's PnP devices
         private string? AutoDetectPico()
@@ -247,7 +190,9 @@ namespace PicoPowerMonitor
                 if (!string.IsNullOrEmpty(discoveredPort))
                 {
                     _targetPort = discoveredPort;
-                    if (StatusText != null) StatusText.Text = $"Pico found on {_targetPort}. Connecting...";
+                    // Simplified
+                    // if (StatusText != null) StatusText.Text = $"Pico found on {_targetPort}. Connecting...";
+                    StatusText?.Text = $"Pico found on {_targetPort}. Connecting...";
                     TryConnect();
                 }
                 else
@@ -279,9 +224,15 @@ namespace PicoPowerMonitor
                     string p = match.Groups[3].Value;
 
                     DispatcherQueue.TryEnqueue(() => {
-                        if (VoltageText != null) VoltageText.Text = $"V: {v}";
-                        if (CurrentText != null) CurrentText.Text = $"I: {i}";
-                        // if (PowerText != null) PowerText.Text = $"P: {p}";
+                        VoltageText?.Text = $"V: {v}";
+                        CurrentText?.Text = $"I: {i}";
+                        // Removed Power Output, just not needed.
+                        // PowerText?.Text = $"P: {p}";
+                        // Convert current string to double and pass to NewHardwareDataReceived
+                        if (double.TryParse(i, out double currentValue))
+                        {
+                            NewHardwareDataReceived(currentValue);
+                        }
                     });
                 }
             }
@@ -357,11 +308,7 @@ namespace PicoPowerMonitor
             }
 
             // Request ScottPlot to redraw the UI with the updated array data
-            // Note: If calling from a background serial thread, wrap this in DispatcherQueue.TryEnqueue
-            DispatcherQueue.TryEnqueue(() =>
-            {
-                CurrentSignaturePlot.Refresh();
-            });
+            CurrentSignaturePlot.Refresh();
         }
     }
 }
