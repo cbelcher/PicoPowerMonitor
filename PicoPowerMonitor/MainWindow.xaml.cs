@@ -1,5 +1,5 @@
-// Version v8.1 6/11/2026 Major UI Changes.
-// Fixed regular expression, I have cut the power reading from being sent to the pc.
+// Version v9.0 6/11/2026 Major UI Changes.
+// This new UI works and converted to ScottPlotStream Plot.
 using Microsoft.UI;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
@@ -38,20 +38,20 @@ namespace PicoPowerMonitor
         private string? _targetPort;
 
         // 1. Allocate a fixed buffer for raw data points (e.g., last 1,000 readings)  Added 6/10/2026
-        private readonly double[] _currentDataBuffer = new double[1000];
-        private int _nextDataIndex = 0;
+        // private readonly double[] _currentDataBuffer = new double[1000];
+        
+        // How many data points are show at one on the plot.
+        private readonly int streamLength = 100; 
+        //private int _nextDataIndex = 0;
 
-        private Signal? _signalPlot;
-        private VerticalLine? _currentPositionLine;
+        //private Signal? _signalPlot;
+        private DataStreamer? _streamerPlot; 
+        //private VerticalLine? _currentPositionLine;
         //
 
         // Reconnect timer to handle unexpected disconnections
         private readonly DispatcherTimer _reconnectTimer;
 
-        // Updated Regex for "V: 0.000, I: 0.000, P: 0.000"
-        // 5/5/2026 Had to change the regex to catch the negitive current values.  Updated regex to look for optional negative sign before the current value.
-        // Ever since adding the MOSFET the INA Report Negitive Current when idle, need to figure out what is going on.
-        // private static readonly Regex PicoRegex = new Regex(@"V:\s*([\d.]+),\s*I:\s*([\d.]+),\s*P:\s*([\d.]+)");
         // 6/11/2026 pulled the plug on the Power Monitor from sending power readings, adjustding regular expression.
         // private static readonly Regex PicoRegex = new Regex(@"V:\s*([\d.-]+),\s*I:\s*([\d.-]+),\s*P:\s*([\d.-]+)");
         private static readonly Regex PicoRegex = new Regex(@"V:\s*([\d.-]+),\s*I:\s*([\d.-]+)");
@@ -165,14 +165,8 @@ namespace PicoPowerMonitor
                 _picoPort.DataReceived += SerialPort_DataReceived;
                 _picoPort.Open();
 
-
-                // This resolved IDE0031 Null check can be simplified.  6/10/2026
+                                // Checks if StatusText is not null before updating its text. 
                 StatusText?.Text = "";
-                // if (StatusText != null)
-                // {
-                    // Update GUI Status
-                    // StatusText.Text = "";
-                // }
             }
             catch
             {
@@ -190,7 +184,7 @@ namespace PicoPowerMonitor
                 if (!string.IsNullOrEmpty(discoveredPort))
                 {
                     _targetPort = discoveredPort;
-                    // Simplified
+
                     // if (StatusText != null) StatusText.Text = $"Pico found on {_targetPort}. Connecting...";
                     StatusText?.Text = $"Pico found on {_targetPort}. Connecting...";
                     TryConnect();
@@ -221,14 +215,16 @@ namespace PicoPowerMonitor
                 {
                     string v = match.Groups[1].Value;
                     string i = match.Groups[2].Value;
-                    string p = match.Groups[3].Value;
+                    // Removed Power Output, just not needed.
+                    //string p = match.Groups[3].Value;
 
                     DispatcherQueue.TryEnqueue(() => {
                         VoltageText?.Text = $"V: {v}";
                         CurrentText?.Text = $"I: {i}";
                         // Removed Power Output, just not needed.
                         // PowerText?.Text = $"P: {p}";
-                        // Convert current string to double and pass to NewHardwareDataReceived
+
+                        // Convert current string to double and pass to NewHardwareDataReceived to update plot.
                         if (double.TryParse(i, out double currentValue))
                         {
                             NewHardwareDataReceived(currentValue);
@@ -256,30 +252,36 @@ namespace PicoPowerMonitor
 
         private void InitializeGraph()
         {
+            Debug.WriteLine("Entered InitializeGraph Function");
             // 2. Link the buffer directly to the plot
-            _signalPlot = CurrentSignaturePlot.Plot.Add.Signal(_currentDataBuffer);
-
+            //_signalPlot = CurrentSignaturePlot.Plot.Add.Signal(_currentDataBuffer);
+            _streamerPlot = CurrentSignaturePlot.Plot.Add.DataStreamer(streamLength);
+            Debug.WriteLine($"streamLength: {streamLength}");
             // Customize visual style for sharp diagnostic signatures
-            _signalPlot.Color = ScottPlot.Colors.Green;
-            _signalPlot.LineWidth = 2;
+            _streamerPlot.Color = ScottPlot.Colors.Green;
+            _streamerPlot.LineWidth = 2;
 
             // 3. Add a vertical indicator line showing the current write head position
-            _currentPositionLine = CurrentSignaturePlot.Plot.Add.VerticalLine(0);
-            _currentPositionLine.Color = ScottPlot.Colors.Red;
-            _currentPositionLine.LinePattern = LinePattern.Dotted;
+            //_currentPositionLine = CurrentSignaturePlot.Plot.Add.VerticalLine(0);
+            // _currentPositionLine.Color = ScottPlot.Colors.Red;
+            // _currentPositionLine.LinePattern = LinePattern.Dotted;
 
             // Set up axes labels for your clients
-            CurrentSignaturePlot.Plot.XLabel("Sample Index");
+            // CurrentSignaturePlot.Plot.XLabel("Sample Index");
             CurrentSignaturePlot.Plot.YLabel("Current (Amps)");
-            CurrentSignaturePlot.Plot.Title("Instantaneous Current Signature");
+            // CurrentSignaturePlot.Plot.Title("Instantaneous Current Signature");
 
             // Hide Vertical Grid Lines
             //CurrentSignaturePlot.Plot.?
 
 
             // Tell the plot to scale cleanly to fit our 1,000 points
-            CurrentSignaturePlot.Plot.Axes.SetLimits(0, _currentDataBuffer.Length, 0, 5.0); // 0-5A scale default
+            CurrentSignaturePlot.Plot.Axes.SetLimits(0, streamLength, 0, 5.0); // 0-5A scale default
             CurrentSignaturePlot.Refresh();
+
+            // Auto scale Y axis to fit the data, but keep X axis fixed to streamLength
+            //CurrentSignaturePlot.Plot.AxisAutoY();
+            //CurrentSignaturePlot.Plot.AxisAutoX(false);
 
             // Matches ScottPlot's canvas background to the deep dark panel color (#111115)
             CurrentSignaturePlot.Plot.FigureBackground.Color = ScottPlot.Color.FromHex("#111115");
@@ -287,28 +289,30 @@ namespace PicoPowerMonitor
 
             // Tweak gridlines and label text colors to stand out beautifully on dark background
             CurrentSignaturePlot.Plot.Axes.Color(ScottPlot.Color.FromHex("#5C6370"));
+            Debug.WriteLine("Exiting InitializeGraph Function");
         }
 
-        /// <summary>
-        /// Call this method whenever a new un-averaged packet arrives from your hardware
-        /// </summary>
         public void NewHardwareDataReceived(double instantaneousCurrent)
         {
             // Overwrite the oldest data point in the buffer
-            _currentDataBuffer[_nextDataIndex] = instantaneousCurrent;
+            // _currentDataBuffer[_nextDataIndex] = instantaneousCurrent;
+
+
 
             // Move the vertical line to show where the new data is dropping
-            _currentPositionLine?.X = _nextDataIndex;
+            //_currentPositionLine?.X = _nextDataIndex;
 
             // Increment index and wrap around at the end of the buffer
-            _nextDataIndex++;
-            if (_nextDataIndex >= _currentDataBuffer.Length)
-            {
-                _nextDataIndex = 0;
-            }
-
+            // _nextDataIndex++;
+            // if (_nextDataIndex >= _currentDataBuffer.Length)
+            // {
+            //    _nextDataIndex = 0;
+            // }
+            _streamerPlot?.Add(instantaneousCurrent);
+            _streamerPlot?.ViewScrollLeft();
             // Request ScottPlot to redraw the UI with the updated array data
             CurrentSignaturePlot.Refresh();
+            
         }
     }
 }
