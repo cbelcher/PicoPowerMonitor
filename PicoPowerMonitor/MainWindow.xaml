@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- v9.2 6/12/2026 Major UI Changes. -->
+<!-- v10.0, 6/12/2026 Rearrange GUI with Voltage over Current then Plot at the bottom. -->
 <Window
     x:Class="PicoPowerMonitor.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -9,77 +9,75 @@
 
     <Grid Background="#1E1E24" Padding="15">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
+            <RowDefinition Height="150" />
+            <RowDefinition Height="150" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <Grid Grid.Row="0" Margin="0,0,0,15">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="15" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
+        <Border Grid.Row="0" 
+                Background="#111115" 
+                BorderBrush="#4A90E2" 
+                BorderThickness="1.5" 
+                CornerRadius="12" 
+                Padding="20"
+                Margin="0,0,0,15">
+            <Grid>
+                <TextBlock Text="VOLTAGE" 
+                           FontSize="12" 
+                           FontWeight="Bold" 
+                           Foreground="#4A90E2" 
+                           HorizontalAlignment="Left"
+                           VerticalAlignment="Top"/>
 
-            <Border Grid.Column="0" 
-                    Background="#111115" 
-                    BorderBrush="#4A90E2" 
-                    BorderThickness="1.5" 
-                    CornerRadius="12" 
-                    Padding="15,10">
-                <StackPanel>
-                    <TextBlock Text="VOLTAGE" 
-                               FontSize="12" 
-                               FontWeight="Bold" 
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
+                    <TextBlock x:Name="VoltageText" 
+                               Text="V: 0.000" 
+                               FontSize="56" FontWeight="SemiBold"
+                               FontFamily="Consolas" 
+                               Foreground="White"/>
+                    <TextBlock Text="V" 
+                               FontSize="38" 
+                               FontWeight="Bold"
                                Foreground="#4A90E2" 
-                               Margin="5,0,0,2"/>
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                        <TextBlock x:Name="VoltageText" 
-                                   Text="0.000" 
-                                   FontSize="44" 
-                                   FontWeight="SemiBold"
-                                   FontFamily="Consolas" 
-                                   Foreground="White"/>
-                        <TextBlock Text="V" 
-                                   FontSize="32" 
-                                   FontWeight="Bold"
-                                   Foreground="#4A90E2" 
-                                   Margin="12,0,0,0" 
-                                   VerticalAlignment="Center"/>
-                    </StackPanel>
+                               Margin="15,0,0,0" 
+                               VerticalAlignment="Center"/>
                 </StackPanel>
-            </Border>
-
-            <Border Grid.Column="2" 
-                    Background="#111115" 
-                    BorderBrush="#E06C75" 
-                    BorderThickness="1.5" 
-                    CornerRadius="12" 
-                    Padding="15,10">
-                <StackPanel>
-                    <TextBlock Text="CURRENT" 
-                               FontSize="12" 
-                               FontWeight="Bold" 
-                               Foreground="#E06C75" 
-                               Margin="5,0,0,2"/>
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                        <TextBlock x:Name="CurrentText" 
-                                   Text="0.000" 
-                                   FontSize="44" 
-                                   FontWeight="SemiBold"
-                                   FontFamily="Consolas" 
-                                   Foreground="White"/>
-                        <TextBlock Text="A" 
-                                   FontSize="32" 
-                                   FontWeight="Bold"
-                                   Foreground="#E06C75" 
-                                   Margin="12,0,0,0" 
-                                   VerticalAlignment="Center"/>
-                    </StackPanel>
-                </StackPanel>
-            </Border>
-        </Grid>
+            </Grid>
+        </Border>
 
         <Border Grid.Row="1" 
+                Background="#111115" 
+                BorderBrush="#E06C75" 
+                BorderThickness="1.5" 
+                CornerRadius="12" 
+                Padding="20"
+                Margin="0,0,0,15">
+            <Grid>
+                <TextBlock Text="CURRENT" 
+                           FontSize="12" 
+                           FontWeight="Bold" 
+                           Foreground="#E06C75" 
+                           HorizontalAlignment="Left"
+                           VerticalAlignment="Top"/>
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
+                    <TextBlock x:Name="CurrentText" 
+                               Text="I: 0.000" 
+                               FontSize="56" 
+                               FontWeight="SemiBold"
+                               FontFamily="Consolas" 
+                               Foreground="White"/>
+                    <TextBlock Text="A" 
+                               FontSize="38" 
+                               FontWeight="Bold"
+                               Foreground="#E06C75" 
+                               Margin="15,0,0,0" 
+                               VerticalAlignment="Center"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <Border Grid.Row="2" 
                 Background="#111115" 
                 BorderBrush="#3E4451" 
                 BorderThickness="1.5" 
@@ -111,7 +109,7 @@
                              VerticalAlignment="Center" 
                              Margin="0,0,8,0"/>
                     <TextBlock x:Name="StatusText" 
-                               Text="Connected @ 460800" 
+                               Text="Connect on COM15." 
                                FontSize="14" 
                                FontWeight="Medium"
                                Foreground="#00FFC4" 

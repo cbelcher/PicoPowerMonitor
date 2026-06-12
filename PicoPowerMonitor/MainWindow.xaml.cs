@@ -1,5 +1,5 @@
-// Version v9.2 6/12/2026
-// Cleaning Moving Ticks to Right Y-Axis, Removing Left Tick Generator.
+// Version 10.0, 6/12/2026
+// Rearrange GUI with Voltage over Current then Plot at the bottom
 using Microsoft.UI;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
@@ -58,8 +58,10 @@ namespace PicoPowerMonitor
             // Initialize ScottPlot Current Plot - Added 6/10/2026
             InitializeGraph();
 
-            // Just setting to static size for now. Changed 6/11/2026
-            this.AppWindow.Resize(new Windows.Graphics.SizeInt32(650, 500));
+            // Adjusted for new Vertical layout. Changed 6/12/2026
+            // this.AppWindow.Resize(new Windows.Graphics.SizeInt32(650, 500));
+            this.AppWindow.Resize(new Windows.Graphics.SizeInt32(630, 712));
+
 
             // Find the Pico's COM port automatically
             // Procedure attemps to find a Pico based on its USB VID:PID.
