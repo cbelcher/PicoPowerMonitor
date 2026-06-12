@@ -1,5 +1,4 @@
-// Version 10.2, 6/12/2026
-// Changing font to Cascadia Code, adjusted Margins.
+// v10.3, 6/12/2026 Removed all but Right Frame of Plot.
 using Microsoft.UI;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
@@ -248,7 +247,12 @@ namespace PicoPowerMonitor
         private void InitializeGraph()
         {
             _streamerPlot = CurrentSignaturePlot.Plot.Add.DataStreamer(streamLength);
-            
+
+            // Removed all but Right Frame
+            CurrentSignaturePlot.Plot.Axes.Bottom.FrameLineStyle.IsVisible = false;
+            CurrentSignaturePlot.Plot.Axes.Top.FrameLineStyle.IsVisible = false;
+            CurrentSignaturePlot.Plot.Axes.Left.FrameLineStyle.IsVisible = false;
+
             // Plot color and width
             _streamerPlot.Color = ScottPlot.Colors.Blue;
             _streamerPlot.LineWidth = 3;
