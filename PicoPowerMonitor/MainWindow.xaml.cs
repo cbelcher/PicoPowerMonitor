@@ -1,5 +1,5 @@
-// Version 10.1, 6/12/2026
-// Removed V: and I: from the Voltage and Current text blocks.
+// Version 10.2, 6/12/2026
+// Changing font to Cascadia Code, adjusted Margins.
 using Microsoft.UI;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
