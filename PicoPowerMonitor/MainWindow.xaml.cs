@@ -1,5 +1,5 @@
-// Version v9.0 6/11/2026 Major UI Changes.
-// This new UI works and converted to ScottPlotStream Plot.
+// Version v9.2 6/12/2026
+// Cleaning Moving Ticks to Right Y-Axis, Removing Left Tick Generator.
 using Microsoft.UI;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
@@ -37,17 +37,11 @@ namespace PicoPowerMonitor
         private SerialPort? _picoPort;
         private string? _targetPort;
 
-        // 1. Allocate a fixed buffer for raw data points (e.g., last 1,000 readings)  Added 6/10/2026
-        // private readonly double[] _currentDataBuffer = new double[1000];
-        
         // How many data points are show at one on the plot.
-        private readonly int streamLength = 100; 
-        //private int _nextDataIndex = 0;
+        private readonly int streamLength = 40; 
 
-        //private Signal? _signalPlot;
+       // Instantiate a instance of the ScottPlot DataStreamer class.
         private DataStreamer? _streamerPlot; 
-        //private VerticalLine? _currentPositionLine;
-        //
 
         // Reconnect timer to handle unexpected disconnections
         private readonly DispatcherTimer _reconnectTimer;
@@ -107,10 +101,8 @@ namespace PicoPowerMonitor
                         // Chip LOGO: BYT with 2 squares around it.
                         // BYQ16E had PID: 0005
                         // FQ16ES Had PID: 101F.
-                        // Couple I can even ready the markings on the chip.
+                        // Couple I can even read the markings on the chip.
                         // Updated code to look for either PID.
-
-                        // If this happens again, just dump the PID.
 
                         if (!string.IsNullOrEmpty(hardwareId) &&
                             hardwareId.Contains("VID_2E8A") &&
@@ -166,7 +158,7 @@ namespace PicoPowerMonitor
                 _picoPort.Open();
 
                                 // Checks if StatusText is not null before updating its text. 
-                StatusText?.Text = "";
+                StatusText?.Text = $"Connect on {_targetPort}.";
             }
             catch
             {
@@ -221,8 +213,6 @@ namespace PicoPowerMonitor
                     DispatcherQueue.TryEnqueue(() => {
                         VoltageText?.Text = $"V: {v}";
                         CurrentText?.Text = $"I: {i}";
-                        // Removed Power Output, just not needed.
-                        // PowerText?.Text = $"P: {p}";
 
                         // Convert current string to double and pass to NewHardwareDataReceived to update plot.
                         if (double.TryParse(i, out double currentValue))
@@ -252,67 +242,51 @@ namespace PicoPowerMonitor
 
         private void InitializeGraph()
         {
-            Debug.WriteLine("Entered InitializeGraph Function");
-            // 2. Link the buffer directly to the plot
-            //_signalPlot = CurrentSignaturePlot.Plot.Add.Signal(_currentDataBuffer);
             _streamerPlot = CurrentSignaturePlot.Plot.Add.DataStreamer(streamLength);
-            Debug.WriteLine($"streamLength: {streamLength}");
-            // Customize visual style for sharp diagnostic signatures
-            _streamerPlot.Color = ScottPlot.Colors.Green;
-            _streamerPlot.LineWidth = 2;
+            
+            // Plot color and width
+            _streamerPlot.Color = ScottPlot.Colors.Blue;
+            _streamerPlot.LineWidth = 3;
 
-            // 3. Add a vertical indicator line showing the current write head position
-            //_currentPositionLine = CurrentSignaturePlot.Plot.Add.VerticalLine(0);
-            // _currentPositionLine.Color = ScottPlot.Colors.Red;
-            // _currentPositionLine.LinePattern = LinePattern.Dotted;
+            // Configure grid to display ticks from the right Y axis
+            _streamerPlot.Axes.YAxis = CurrentSignaturePlot.Plot.Axes.Right;
+            CurrentSignaturePlot.Plot.Grid.YAxis = CurrentSignaturePlot.Plot.Axes.Right;
 
-            // Set up axes labels for your clients
-            // CurrentSignaturePlot.Plot.XLabel("Sample Index");
-            CurrentSignaturePlot.Plot.YLabel("Current (Amps)");
-            // CurrentSignaturePlot.Plot.Title("Instantaneous Current Signature");
+            // Style Right Y-Axis attributes
+            //CurrentSignaturePlot.Plot.YLabel("Current (Amps)");
+            CurrentSignaturePlot.Plot.Axes.Right.Label.Text = "Current (Amps)";
 
-            // Hide Vertical Grid Lines
-            //CurrentSignaturePlot.Plot.?
+            // Remove tick generator from Left Y and Bottom X Axis
+            CurrentSignaturePlot.Plot.Axes.Left.RemoveTickGenerator();
+            CurrentSignaturePlot.Plot.Axes.Bottom.RemoveTickGenerator();
 
+            // Hide Grid Lines
+            CurrentSignaturePlot.Plot.Grid.XAxisStyle.IsVisible = false;
+            CurrentSignaturePlot.Plot.Grid.YAxisStyle.IsVisible = false;
 
-            // Tell the plot to scale cleanly to fit our 1,000 points
-            CurrentSignaturePlot.Plot.Axes.SetLimits(0, streamLength, 0, 5.0); // 0-5A scale default
+            // Configure the initial plot initial scale from 0 to 5A
+            CurrentSignaturePlot.Plot.Axes.SetLimits(0, streamLength, 0, 5.0);
             CurrentSignaturePlot.Refresh();
 
-            // Auto scale Y axis to fit the data, but keep X axis fixed to streamLength
-            //CurrentSignaturePlot.Plot.AxisAutoY();
-            //CurrentSignaturePlot.Plot.AxisAutoX(false);
+            // Auto scale to fit the data.
+            CurrentSignaturePlot.Plot.Axes.ContinuouslyAutoscale = true;
 
-            // Matches ScottPlot's canvas background to the deep dark panel color (#111115)
+            // Background panel color
             CurrentSignaturePlot.Plot.FigureBackground.Color = ScottPlot.Color.FromHex("#111115");
             CurrentSignaturePlot.Plot.DataBackground.Color = ScottPlot.Color.FromHex("#111115");
 
-            // Tweak gridlines and label text colors to stand out beautifully on dark background
+            // Gridlines and label text colors
             CurrentSignaturePlot.Plot.Axes.Color(ScottPlot.Color.FromHex("#5C6370"));
-            Debug.WriteLine("Exiting InitializeGraph Function");
         }
 
         public void NewHardwareDataReceived(double instantaneousCurrent)
         {
-            // Overwrite the oldest data point in the buffer
-            // _currentDataBuffer[_nextDataIndex] = instantaneousCurrent;
-
-
-
-            // Move the vertical line to show where the new data is dropping
-            //_currentPositionLine?.X = _nextDataIndex;
-
-            // Increment index and wrap around at the end of the buffer
-            // _nextDataIndex++;
-            // if (_nextDataIndex >= _currentDataBuffer.Length)
-            // {
-            //    _nextDataIndex = 0;
-            // }
+            // Plot new data point.
             _streamerPlot?.Add(instantaneousCurrent);
+            // Scroll plot to the left as new data is placed on the right.
             _streamerPlot?.ViewScrollLeft();
             // Request ScottPlot to redraw the UI with the updated array data
             CurrentSignaturePlot.Refresh();
-            
         }
     }
 }
