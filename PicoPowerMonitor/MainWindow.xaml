@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- v10.0, 6/12/2026 Rearrange GUI with Voltage over Current then Plot at the bottom. -->
+<!-- v10.1, 6/12/2026 Removing V: and I: in front of live data. -->
 <Window
     x:Class="PicoPowerMonitor.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -31,7 +31,7 @@
 
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
                     <TextBlock x:Name="VoltageText" 
-                               Text="V: 0.000" 
+                               Text="0.000" 
                                FontSize="56" FontWeight="SemiBold"
                                FontFamily="Consolas" 
                                Foreground="White"/>
@@ -62,7 +62,7 @@
 
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
                     <TextBlock x:Name="CurrentText" 
-                               Text="I: 0.000" 
+                               Text="0.000" 
                                FontSize="56" 
                                FontWeight="SemiBold"
                                FontFamily="Consolas" 

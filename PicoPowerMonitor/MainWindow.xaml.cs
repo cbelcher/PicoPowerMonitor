@@ -1,5 +1,5 @@
-// Version 10.0, 6/12/2026
-// Rearrange GUI with Voltage over Current then Plot at the bottom
+// Version 10.1, 6/12/2026
+// Removed V: and I: from the Voltage and Current text blocks.
 using Microsoft.UI;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
@@ -213,8 +213,11 @@ namespace PicoPowerMonitor
                     //string p = match.Groups[3].Value;
 
                     DispatcherQueue.TryEnqueue(() => {
-                        VoltageText?.Text = $"V: {v}";
-                        CurrentText?.Text = $"I: {i}";
+                        // VoltageText?.Text = $"V: {v}";
+                        // CurrentText?.Text = $"I: {i}";
+                        VoltageText?.Text = v;
+                        CurrentText?.Text = i;
+
 
                         // Convert current string to double and pass to NewHardwareDataReceived to update plot.
                         if (double.TryParse(i, out double currentValue))
