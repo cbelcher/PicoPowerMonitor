@@ -1,32 +1,12 @@
-// v11.2, 6/13/2026 Spelling corrections.
-using Microsoft.UI;
-using Microsoft.UI.Windowing;
+// v11.3, 6/13/2026 Cleaning up unneeded using directives, playing with colors.
 using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Data;
-using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Navigation;
 using ScottPlot;
 using ScottPlot.Plottables;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-// going to need System.IO.Ports for the serial port stuff
 using System.IO.Ports;
-using System.Linq;
-// Used to detect RP2040 disconnects and attempt to reconnect via WMI
-// Requires System.Management NuGet package
 using System.Management;
-using System.Runtime.InteropServices.WindowsRuntime;
-// Going to need the use of Regular Expressions to parse the serial data.
 using System.Text.RegularExpressions;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
-using WinRT.Interop;
-// required System Backdrops for Acrylic and Mica.
 using Microsoft.UI.Composition;
 using Microsoft.UI.Composition.SystemBackdrops;
 using WinRT;
@@ -226,8 +206,12 @@ namespace PicoPowerMonitor
                 _picoPort.DataReceived += SerialPort_DataReceived;
                 _picoPort.Open();
 
-                                // Checks if StatusText is not null before updating its text. 
-                StatusText?.Text = $"Connect on {_targetPort}.";
+                // Checks if StatusText is not null before updating its text.
+                if (StatusText != null)
+                {
+                    StatusText.Text = $"Connected on {_targetPort}.";
+                    StatusText.Foreground = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 70, 166, 0));
+                }
             }
             catch
             {
@@ -246,8 +230,12 @@ namespace PicoPowerMonitor
                 {
                     _targetPort = discoveredPort;
 
-                    // if (StatusText != null) StatusText.Text = $"Pico found on {_targetPort}. Connecting...";
-                    StatusText?.Text = $"Pico found on {_targetPort}. Connecting...";
+                    if (StatusText != null)
+                    {
+                        StatusText.Text = $"Pico found on {_targetPort}. Connecting...";
+                        StatusText.Foreground = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 70, 166, 0));
+                    }
+
                     TryConnect();
                 }
                 else
@@ -255,7 +243,10 @@ namespace PicoPowerMonitor
                     if (StatusText != null)
                     {
                         StatusText.Text = "Searching for Ammeter...";
-                        StatusText.Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(Windows.UI.Color.FromArgb(255, 255, 165, 0));
+                        //StatusText.Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(Windows.UI.Color.FromArgb(255, 255, 165, 0));
+                        // Set text color to orange to indicate searching status
+                        // Does not work StatusText.Foreground = new SolidColorBrush(Windows.UI.Color.FromArgb("#FFFFA500"));
+                        StatusText.Foreground = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 255, 165, 0));
                     }
                 }
             }
