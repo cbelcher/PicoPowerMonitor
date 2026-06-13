@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- v11.3, 6/13/2026 Cleaning up unneeded using directives, playing with colors. -->
+<!-- v11.4, 6/13/2026 Controlling Connection Ellipse colors based on connection status -->
 <Window
     x:Class="PicoPowerMonitor.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -115,9 +115,9 @@
                                      VerticalAlignment="Stretch"/>
 
                 <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="5,5,0,0" VerticalAlignment="Center">
-                    <Ellipse Width="10" 
+                    <Ellipse Name="StatusEllipse"
+                             Width="10" 
                              Height="10" 
-                             Fill="#46a64a" 
                              VerticalAlignment="Center" 
                              Margin="0,0,8,0"/>
                     <TextBlock x:Name="StatusText" 

@@ -1,4 +1,4 @@
-// v11.3, 6/13/2026 Cleaning up unneeded using directives, playing with colors.
+// v11.4, 6/13/2026 Controlling Connection Ellipse colors based on connection status.
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
 using ScottPlot;
@@ -210,7 +210,9 @@ namespace PicoPowerMonitor
                 if (StatusText != null)
                 {
                     StatusText.Text = $"Connected on {_targetPort}.";
-                    StatusText.Foreground = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 70, 166, 0));
+                    // StatusText and Ellispse to Green to indicate successful connection.  Changed 6/13/2026
+                    StatusText.Foreground = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 61, 157, 36));
+                    StatusEllipse.Fill = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 61, 157, 36));
                 }
             }
             catch
@@ -233,7 +235,9 @@ namespace PicoPowerMonitor
                     if (StatusText != null)
                     {
                         StatusText.Text = $"Pico found on {_targetPort}. Connecting...";
-                        StatusText.Foreground = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 70, 166, 0));
+                        // Green Status Text. Amber StatusEllipse while connection is established.
+                        StatusText.Foreground = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 61, 157, 36));
+                        StatusEllipse.Fill = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 255, 191, 0));
                     }
 
                     TryConnect();
@@ -242,11 +246,11 @@ namespace PicoPowerMonitor
                 {
                     if (StatusText != null)
                     {
-                        StatusText.Text = "Searching for Ammeter...";
-                        //StatusText.Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(Windows.UI.Color.FromArgb(255, 255, 165, 0));
-                        // Set text color to orange to indicate searching status
-                        // Does not work StatusText.Foreground = new SolidColorBrush(Windows.UI.Color.FromArgb("#FFFFA500"));
-                        StatusText.Foreground = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 255, 165, 0));
+                        StatusText.Text = "Searching for Pico Power Monitor...";
+                        // Set StatusText color to Amber to indicate searching
+                        // Set StatusEllipse color to red to indicate not connected.
+                        StatusText.Foreground = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 255, 191, 0));
+                        StatusEllipse.Fill = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 255, 0, 0));
                     }
                 }
             }
@@ -271,8 +275,6 @@ namespace PicoPowerMonitor
                     //string p = match.Groups[3].Value;
 
                     DispatcherQueue.TryEnqueue(() => {
-                        // VoltageText?.Text = $"V: {v}";
-                        // CurrentText?.Text = $"I: {i}";
                         VoltageText?.Text = v;
                         CurrentText?.Text = i;
 
