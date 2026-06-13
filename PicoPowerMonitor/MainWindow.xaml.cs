@@ -1,4 +1,4 @@
-// v11.0, 6/13/2026 DesktopAcrylicController for Transparent Background, it works.
+// v11.1, 6/13/2026 Cleaning up remarks of uneeded DesktopAcrylicController code.
 using Microsoft.UI;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
@@ -54,7 +54,6 @@ namespace PicoPowerMonitor
         private static readonly Regex PicoRegex = new Regex(@"V:\s*([\d.-]+),\s*I:\s*([\d.-]+)");
 
         // Fields for Acrylic Backdrop
-        // private WindowsSystemDispatcherQueueHelper? _wsdqHelper;
         private DesktopAcrylicController? _acrylicController;
         private SystemBackdropConfiguration? _configurationSource;
 
@@ -97,9 +96,6 @@ namespace PicoPowerMonitor
         {
             if (DesktopAcrylicController.IsSupported())
             {
-                // _wsdqHelper = new WindowsSystemDispatcherQueueHelper();
-                // _wsdqHelper.EnsureWindowsSystemDispatcherQueue();
-
                 // 1. Create the activation configuration source
                 _configurationSource = new SystemBackdropConfiguration();
 
@@ -153,37 +149,6 @@ namespace PicoPowerMonitor
               //  _configurationSource.Theme = SystemBackdropTheme.Dark;
             _configurationSource?.Theme = SystemBackdropTheme.Dark;
         }
-
-        // --- HELPER CLASS REQUIRED FOR WINUI 3 BACKDROPS ---
-        // This hooks into the OS compositor dispatcher queue to handle real-time blur scaling
-        //class WindowsSystemDispatcherQueueHelper
-        //{
-            //private object? _dispatcherQueueController = null;
-
-            //public void EnsureWindowsSystemDispatcherQueue()
-            //{
-                //if (Windows.System.DispatcherQueue.GetForCurrentThread() != null) return;
-
-                //DispatcherQueueOptions options;
-                //options.dwSize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(DispatcherQueueOptions));
-                //options.threadType = 2; // DQTYPE_THREAD_CURRENT
-                //options.apartmentType = 2; // DQTAT_COM_STA
-
-                //CreateDispatcherQueueController(options, ref _dispatcherQueueController);
-            //}
-
-            //[System.Runtime.InteropServices.DllImport("CoreMessaging.dll")]
-            //private static extern int CreateDispatcherQueueController(DispatcherQueueOptions options, ref object? dispatcherQueueController);
-
-            //private struct DispatcherQueueOptions
-            //{
-                //public int dwSize;
-                //public int threadType;
-                //public int apartmentType;
-            //}
-        //}
-
-        
 
 
         // Auto-detect the Pico's COM port by looking for its unique VID/PID in the system's PnP devices
