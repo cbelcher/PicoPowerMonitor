@@ -1,4 +1,4 @@
-// v11.1, 6/13/2026 Cleaning up remarks of uneeded DesktopAcrylicController code.
+// v11.2, 6/13/2026 Spelling corrections.
 using Microsoft.UI;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
@@ -49,7 +49,7 @@ namespace PicoPowerMonitor
         // Reconnect timer to handle unexpected disconnections
         private readonly DispatcherTimer _reconnectTimer;
 
-        // 6/11/2026 pulled the plug on the Power Monitor from sending power readings, adjustding regular expression.
+        // 6/11/2026 pulled the plug on the Power Monitor from sending power readings, adjusting regular expression.
         // private static readonly Regex PicoRegex = new Regex(@"V:\s*([\d.-]+),\s*I:\s*([\d.-]+),\s*P:\s*([\d.-]+)");
         private static readonly Regex PicoRegex = new Regex(@"V:\s*([\d.-]+),\s*I:\s*([\d.-]+)");
 
@@ -72,9 +72,9 @@ namespace PicoPowerMonitor
             TrySetAcrylicBackdrop();
 
             // Find the Pico's COM port automatically
-            // Procedure attemps to find a Pico based on its USB VID:PID.
+            // Procedure attempts to find a Pico based on its USB VID:PID.
             // If it finds one, its COMx value is stored in detected.
-            // This will be passed as a parameter to AutoConnect to estabish a connection.
+            // This will be passed as a parameter to AutoConnect to establish a connection.
             var detected = AutoDetectPico();
 
             // Setup a Dispatch Timer to check connection every 2 seconds
@@ -180,7 +180,7 @@ namespace PicoPowerMonitor
                         {
                             var m = Regex.Match(caption, @"\((COM\d+)\)");
                             // if (m.Success) return m.Groups[1].Value;
-                            // Set selected to string from m.Groups[1].Value.  This string just contains COMx, no parenthisis.
+                            // Set selected to string from m.Groups[1].Value.  This string just contains COMx, no parenthesis.
                             if (m.Success)
                             {
                                 var selected = m.Groups[1].Value;
@@ -352,7 +352,7 @@ namespace PicoPowerMonitor
             CurrentSignaturePlot.Plot.FigureBackground.Color = ScottPlot.Color.FromHex("#111115");
             CurrentSignaturePlot.Plot.DataBackground.Color = ScottPlot.Color.FromHex("#111115");
 
-            // Gridlines and label text colors
+            // Grid line and label text colors
             CurrentSignaturePlot.Plot.Axes.Color(ScottPlot.Color.FromHex("#5C6370"));
         }
 
