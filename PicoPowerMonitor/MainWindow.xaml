@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- v11.4, 6/13/2026 Controlling Connection Ellipse colors based on connection status -->
+<!-- v12.0, 6/13/2026 OS was setting Tint and Luminosity back to default after moving window.  Solution was to reapply after activated. -->
 <Window
     x:Class="PicoPowerMonitor.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -7,10 +7,6 @@
     xmlns:scottplot="using:ScottPlot.WinUI"
     Title="Pico Power Monitor">
 
-    <!-- Acrylic -->
-    <Window.SystemBackdrop>
-        <DesktopAcrylicBackdrop/>
-    </Window.SystemBackdrop>
 
             <Grid Background="Transparent" Padding="15">
         <Grid.RowDefinitions>

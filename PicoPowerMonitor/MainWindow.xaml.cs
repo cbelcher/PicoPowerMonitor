@@ -1,4 +1,4 @@
-// v11.4, 6/13/2026 Controlling Connection Ellipse colors based on connection status.
+// v12.0, 6/13/2026 OS was setting Tint and Luminosity back to default after moving window.  Solution was to reapply after activated.
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
 using ScottPlot;
@@ -23,10 +23,10 @@ namespace PicoPowerMonitor
         // How many data points are show at one on the plot.
         private readonly int streamLength = 40; 
 
-       // Instantiate a instance of the ScottPlot DataStreamer class.
+        // Instantiate a instance of the ScottPlot DataStreamer class.
         private DataStreamer? _streamerPlot; 
 
-        // Reconnect timer to handle unexpected disconnections
+        // Reconnect timer to handle unexpected Pico Power Monitor disconnections
         private readonly DispatcherTimer _reconnectTimer;
 
         // 6/11/2026 pulled the plug on the Power Monitor from sending power readings, adjusting regular expression.
@@ -35,7 +35,7 @@ namespace PicoPowerMonitor
 
         // Fields for Acrylic Backdrop
         private DesktopAcrylicController? _acrylicController;
-        private SystemBackdropConfiguration? _configurationSource;
+        private SystemBackdropConfiguration? _backdropConfiguration;
 
 
         public MainWindow()
@@ -47,9 +47,6 @@ namespace PicoPowerMonitor
 
             // Adjusted for new Vertical layout. Changed 6/12/2026
              this.AppWindow.Resize(new Windows.Graphics.SizeInt32(630, 712));
-
-            // check if the system supports acrylic backdrop and apply it to the window if possible.  Added 6/12/2026
-            TrySetAcrylicBackdrop();
 
             // Find the Pico's COM port automatically
             // Procedure attempts to find a Pico based on its USB VID:PID.
@@ -69,47 +66,62 @@ namespace PicoPowerMonitor
                 _reconnectTimer.Stop();
                 ClosePort();
             };
-        }
-        
 
-        private bool TrySetAcrylicBackdrop()
+            // Set up the persistent Desktop Acrylic Backdrop.
+            // OS will try to override tint/opacity settings when window is moved, have to reapply after every activation.
+            ConfigurePersistentAcrylic();
+        }
+
+        private void ConfigurePersistentAcrylic()
         {
             if (DesktopAcrylicController.IsSupported())
             {
-                // 1. Create the activation configuration source
-                _configurationSource = new SystemBackdropConfiguration();
+                // Establish the configuration source tracking window states
+                _backdropConfiguration = new SystemBackdropConfiguration();
 
-                // Track state changes to handle window focus correctly
+                // Hook into Activated so we re-apply colors if the OS tries to override them
                 this.Activated += Window_Activated;
                 this.Closed += Window_Closed;
 
-                _configurationSource.IsInputActive = true;
-                SetConfigurationTheme();
+                _backdropConfiguration.IsInputActive = true;
+                _backdropConfiguration.Theme = SystemBackdropTheme.Dark;
 
-                // 2. Setup the Acrylic Controller
+                // Initialize the controller
                 _acrylicController = new DesktopAcrylicController();
 
-                // Optional: Customize the tint color/opacity to match your dark theme
-                _acrylicController.TintColor = Windows.UI.Color.FromArgb(255, 30, 30, 36);
-                _acrylicController.TintOpacity = 0.65f; // Lower values = more see-through to desktop
-                _acrylicController.LuminosityOpacity = 0.80f;
+                // Apply your custom styling rules
+                ApplyCustomAcrylicSettings();
 
-                // 3. Connect the controller to our Window
-                _acrylicController.AddSystemBackdropTarget(this.As<ICompositionSupportsSystemBackdrop>());
-                _acrylicController.SetSystemBackdropConfiguration(_configurationSource);
-
-                return true; // Success
+                // Connect it directly to this window
+                _acrylicController.AddSystemBackdropTarget(this.As<Microsoft.UI.Composition.ICompositionSupportsSystemBackdrop>());
+                _acrylicController.SetSystemBackdropConfiguration(_backdropConfiguration);
             }
+        }
 
-            return false; // Acrylic not supported on this OS version
+        private void ApplyCustomAcrylicSettings()
+        {
+            if (_acrylicController != null)
+            {
+                // Lock in your preferred deep dashboard color tone (#1E1E24)
+                _acrylicController.TintColor = Windows.UI.Color.FromArgb(255, 30, 30, 36);
+
+                // Force your targeted opacity settings to stay bound
+                _acrylicController.TintOpacity = 0.25f;
+                _acrylicController.LuminosityOpacity = 0.10f;
+            }
         }
 
         private void Window_Activated(object sender, WindowActivatedEventArgs args)
         {
-            // if (_configurationSource != null)
-               // _configurationSource.IsInputActive = args.WindowActivationState != WindowActivationState.Deactivated;
-            _configurationSource?.IsInputActive = args.WindowActivationState != WindowActivationState.Deactivated;
+            if (_backdropConfiguration != null)
+            {
+                // Keeps track of window focus changes
+                _backdropConfiguration.IsInputActive = args.WindowActivationState != WindowActivationState.Deactivated;
 
+                // FORCED FIX: Every time the window activation state cycles (like clicking/dragging),
+                // aggressively push your custom mix rules back over the OS defaults.
+                ApplyCustomAcrylicSettings();
+            }
         }
 
         private void Window_Closed(object sender, WindowEventArgs args)
@@ -120,16 +132,9 @@ namespace PicoPowerMonitor
                 _acrylicController = null;
             }
             this.Activated -= Window_Activated;
-            _configurationSource = null;
+            // _configurationSource = null;
+            _backdropConfiguration = null;
         }
-
-        private void SetConfigurationTheme()
-        {
-            //if (_configurationSource != null)
-              //  _configurationSource.Theme = SystemBackdropTheme.Dark;
-            _configurationSource?.Theme = SystemBackdropTheme.Dark;
-        }
-
 
         // Auto-detect the Pico's COM port by looking for its unique VID/PID in the system's PnP devices
         private string? AutoDetectPico()
