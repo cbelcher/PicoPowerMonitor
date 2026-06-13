@@ -1,4 +1,7 @@
-// v12.0, 6/13/2026 OS was setting Tint and Luminosity back to default after moving window.  Solution was to reapply after activated.
+// v12.1, 6/13/2026 OS was now setting Tint and Luminosity back to default after losing focus.
+// Solution: In Windows_Activated, force it Active with, set IsInputActive = true.
+// also started to learn how the UI utilized the Alpha channel to control opacity.
+// Discovered its an additive process, taken what the parent has configured and adding its Alpha factor.
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
 using ScottPlot;
@@ -116,7 +119,9 @@ namespace PicoPowerMonitor
             if (_backdropConfiguration != null)
             {
                 // Keeps track of window focus changes
-                _backdropConfiguration.IsInputActive = args.WindowActivationState != WindowActivationState.Deactivated;
+                // Forced this True. Without it, the app would revert to defaults if it went out of focus.
+                // _backdropConfiguration.IsInputActive = args.WindowActivationState != WindowActivationState.Deactivated;
+                _backdropConfiguration.IsInputActive = true;
 
                 // FORCED FIX: Every time the window activation state cycles (like clicking/dragging),
                 // aggressively push your custom mix rules back over the OS defaults.
