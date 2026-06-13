@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- v12.1, 6/13/2026 OS was now setting Tint and Luminosity back to default after losing focus.  Solution: set IsInputActive = true. -->
+<!-- v12.2, 6/13/2026 Just UI Tweaks. ScottPlot not responding to Alpha Channel -->
 <Window
     x:Class="PicoPowerMonitor.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -9,8 +9,8 @@
 
 
     <Grid
-        Background="#33111115"
-        Padding="15">
+        Background="#11111115"
+        Padding="5">
         <Grid.RowDefinitions>
             <RowDefinition Height="150" />
             <RowDefinition Height="150" />
@@ -18,35 +18,35 @@
         </Grid.RowDefinitions>
 
         <Border Grid.Row="0" 
-                Background="#88111115" 
+                Background="#78111115" 
                 BorderBrush="#4A90E2" 
                 BorderThickness="1.5" 
                 CornerRadius="12" 
-                Padding="20"
+                Padding="10"
                 Margin="0,0,0,15">
-            <Grid
-                Background="#20111115">
+            <Grid>
                 <TextBlock Text="VOLTAGE"
-                           FontSize="12"
+                           FontSize="15"
                            FontFamily="Cascadia Code"
-                           FontWeight="Bold" 
                            Foreground="#4A90E2" 
                            HorizontalAlignment="Left"
                            VerticalAlignment="Top"/>
 
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
-                    <TextBlock x:Name="VoltageText" 
-                               Text="0.000" 
+                <StackPanel Orientation="Horizontal"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center">
+                    <TextBlock x:Name="VoltageText"
+                               Text="0.000"
                                FontSize="64"
                                FontFamily="Cascadia Code"
-                               FontWeight="SemiBold"
+                               FontWeight="Normal"
                                Margin="0,10,0,0"
                                Foreground="White"/>
-                    <TextBlock Text="V" 
+                    <TextBlock Text="V"
                                FontSize="64"
                                FontFamily="Cascadia Code"
-                               FontWeight="SemiBold"
-                               Foreground="#4A90E2" 
+                               FontWeight="Normal"
+                               Foreground="#4A90E2"
                                Margin="15,10,0,0"
                                VerticalAlignment="Center"/>
                 </StackPanel>
@@ -54,33 +54,34 @@
         </Border>
 
         <Border Grid.Row="1" 
-                Background="#111115" 
+                Background="#78111115" 
                 BorderBrush="#E06C75" 
                 BorderThickness="1.5" 
                 CornerRadius="12" 
-                Padding="20"
+                Padding="10"
                 Margin="0,0,0,15">
             <Grid>
                 <TextBlock Text="CURRENT" 
-                           FontSize="12"
+                           FontSize="15"
                            FontFamily="Cascadia Code"
-                           FontWeight="Bold" 
                            Foreground="#E06C75" 
                            HorizontalAlignment="Left"
                            VerticalAlignment="Top"/>
 
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
+                <StackPanel Orientation="Horizontal"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center">
                     <TextBlock x:Name="CurrentText" 
                                Text="0.000"
                                FontSize="64"
                                FontFamily="Cascadia Code"
-                               FontWeight="SemiBold"
+                               FontWeight="Normal"
                                Margin="0,10,0,0"
                                Foreground="White"/>
                     <TextBlock Text="A" 
                                FontSize="64"
                                FontFamily="Cascadia Code"
-                               FontWeight="SemiBold"
+                               FontWeight="Normal"
                                Foreground="#E06C75" 
                                Margin="15,10,0,0" 
                                VerticalAlignment="Center"/>
@@ -89,11 +90,11 @@
         </Border>
 
         <Border Grid.Row="2" 
-                Background="#111115" 
+                Background="#78111115" 
                 BorderBrush="#3E4451" 
                 BorderThickness="1.5" 
                 CornerRadius="12" 
-                Padding="15">
+                Padding="10">
 
             <Grid>
                 <Grid.RowDefinitions>
@@ -102,9 +103,17 @@
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
-                <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="5,0,0,5">
-                    <TextBlock Text="Current " FontSize="16" Foreground="White" FontWeight="SemiBold"/>
-                    <TextBlock Text="A" FontSize="16" Foreground="#4A90E2" FontWeight="Bold"/>
+                <StackPanel Grid.Row="0"
+                            Orientation="Horizontal"
+                            Margin="5,0,0,5">
+                    <TextBlock Text="Current"
+                               FontSize="15"
+                               Foreground="White"
+                               FontWeight="Normal"/>
+                    <TextBlock Text=" A"
+                               FontSize="15"
+                               Foreground="#E06C75"
+                               FontWeight="Normal"/>
                 </StackPanel>
 
                 <scottplot:WinUIPlot x:Name="CurrentSignaturePlot" 

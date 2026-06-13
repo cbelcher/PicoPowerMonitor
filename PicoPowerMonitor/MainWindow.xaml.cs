@@ -1,7 +1,4 @@
-// v12.1, 6/13/2026 OS was now setting Tint and Luminosity back to default after losing focus.
-// Solution: In Windows_Activated, force it Active with, set IsInputActive = true.
-// also started to learn how the UI utilized the Alpha channel to control opacity.
-// Discovered its an additive process, taken what the parent has configured and adding its Alpha factor.
+// <!-- v12.2, 6/13/2026 Just UI Tweaks. ScottPlot not responding to Alpha Channel -->
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
 using ScottPlot;
