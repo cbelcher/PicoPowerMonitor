@@ -1,4 +1,4 @@
-// v10.3, 6/12/2026 Removed all but Right Frame of Plot.
+// v11.0, 6/13/2026 DesktopAcrylicController for Transparent Background, it works.
 using Microsoft.UI;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
@@ -26,6 +26,10 @@ using System.Text.RegularExpressions;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using WinRT.Interop;
+// required System Backdrops for Acrylic and Mica.
+using Microsoft.UI.Composition;
+using Microsoft.UI.Composition.SystemBackdrops;
+using WinRT;
 
 
 namespace PicoPowerMonitor
@@ -49,6 +53,11 @@ namespace PicoPowerMonitor
         // private static readonly Regex PicoRegex = new Regex(@"V:\s*([\d.-]+),\s*I:\s*([\d.-]+),\s*P:\s*([\d.-]+)");
         private static readonly Regex PicoRegex = new Regex(@"V:\s*([\d.-]+),\s*I:\s*([\d.-]+)");
 
+        // Fields for Acrylic Backdrop
+        // private WindowsSystemDispatcherQueueHelper? _wsdqHelper;
+        private DesktopAcrylicController? _acrylicController;
+        private SystemBackdropConfiguration? _configurationSource;
+
 
         public MainWindow()
         {
@@ -58,9 +67,10 @@ namespace PicoPowerMonitor
             InitializeGraph();
 
             // Adjusted for new Vertical layout. Changed 6/12/2026
-            // this.AppWindow.Resize(new Windows.Graphics.SizeInt32(650, 500));
-            this.AppWindow.Resize(new Windows.Graphics.SizeInt32(630, 712));
+             this.AppWindow.Resize(new Windows.Graphics.SizeInt32(630, 712));
 
+            // check if the system supports acrylic backdrop and apply it to the window if possible.  Added 6/12/2026
+            TrySetAcrylicBackdrop();
 
             // Find the Pico's COM port automatically
             // Procedure attemps to find a Pico based on its USB VID:PID.
@@ -81,6 +91,99 @@ namespace PicoPowerMonitor
                 ClosePort();
             };
         }
+        
+
+        private bool TrySetAcrylicBackdrop()
+        {
+            if (DesktopAcrylicController.IsSupported())
+            {
+                // _wsdqHelper = new WindowsSystemDispatcherQueueHelper();
+                // _wsdqHelper.EnsureWindowsSystemDispatcherQueue();
+
+                // 1. Create the activation configuration source
+                _configurationSource = new SystemBackdropConfiguration();
+
+                // Track state changes to handle window focus correctly
+                this.Activated += Window_Activated;
+                this.Closed += Window_Closed;
+
+                _configurationSource.IsInputActive = true;
+                SetConfigurationTheme();
+
+                // 2. Setup the Acrylic Controller
+                _acrylicController = new DesktopAcrylicController();
+
+                // Optional: Customize the tint color/opacity to match your dark theme
+                _acrylicController.TintColor = Windows.UI.Color.FromArgb(255, 30, 30, 36);
+                _acrylicController.TintOpacity = 0.65f; // Lower values = more see-through to desktop
+                _acrylicController.LuminosityOpacity = 0.80f;
+
+                // 3. Connect the controller to our Window
+                _acrylicController.AddSystemBackdropTarget(this.As<ICompositionSupportsSystemBackdrop>());
+                _acrylicController.SetSystemBackdropConfiguration(_configurationSource);
+
+                return true; // Success
+            }
+
+            return false; // Acrylic not supported on this OS version
+        }
+
+        private void Window_Activated(object sender, WindowActivatedEventArgs args)
+        {
+            // if (_configurationSource != null)
+               // _configurationSource.IsInputActive = args.WindowActivationState != WindowActivationState.Deactivated;
+            _configurationSource?.IsInputActive = args.WindowActivationState != WindowActivationState.Deactivated;
+
+        }
+
+        private void Window_Closed(object sender, WindowEventArgs args)
+        {
+            if (_acrylicController != null)
+            {
+                _acrylicController.Dispose();
+                _acrylicController = null;
+            }
+            this.Activated -= Window_Activated;
+            _configurationSource = null;
+        }
+
+        private void SetConfigurationTheme()
+        {
+            //if (_configurationSource != null)
+              //  _configurationSource.Theme = SystemBackdropTheme.Dark;
+            _configurationSource?.Theme = SystemBackdropTheme.Dark;
+        }
+
+        // --- HELPER CLASS REQUIRED FOR WINUI 3 BACKDROPS ---
+        // This hooks into the OS compositor dispatcher queue to handle real-time blur scaling
+        //class WindowsSystemDispatcherQueueHelper
+        //{
+            //private object? _dispatcherQueueController = null;
+
+            //public void EnsureWindowsSystemDispatcherQueue()
+            //{
+                //if (Windows.System.DispatcherQueue.GetForCurrentThread() != null) return;
+
+                //DispatcherQueueOptions options;
+                //options.dwSize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(DispatcherQueueOptions));
+                //options.threadType = 2; // DQTYPE_THREAD_CURRENT
+                //options.apartmentType = 2; // DQTAT_COM_STA
+
+                //CreateDispatcherQueueController(options, ref _dispatcherQueueController);
+            //}
+
+            //[System.Runtime.InteropServices.DllImport("CoreMessaging.dll")]
+            //private static extern int CreateDispatcherQueueController(DispatcherQueueOptions options, ref object? dispatcherQueueController);
+
+            //private struct DispatcherQueueOptions
+            //{
+                //public int dwSize;
+                //public int threadType;
+                //public int apartmentType;
+            //}
+        //}
+
+        
 
 
         // Auto-detect the Pico's COM port by looking for its unique VID/PID in the system's PnP devices
