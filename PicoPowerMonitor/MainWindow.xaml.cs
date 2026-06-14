@@ -1,4 +1,4 @@
-// v12.6, 6/14/2026 ScottPlot Marker complete rebuild 
+// v13.0, 6/14/2026 ScottPlot fully funtional transparent corners fillets.
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
 using ScottPlot;
@@ -390,11 +390,13 @@ namespace PicoPowerMonitor
             _valueBadge.LabelStyle.FontName = "Cascadia Code";
             _valueBadge.LabelStyle.Bold = true;
 
+            // Configure Figure and Data background colors to be transparent, allowing the Acrylic backdrop to show through.
+            CurrentSignaturePlot.Plot.FigureBackground.Color = ScottPlot.Colors.Transparent;
+            CurrentSignaturePlot.Plot.DataBackground.Color = ScottPlot.Colors.Transparent;
 
             // Initial paint
             CurrentSignaturePlot.Refresh();
-
-        }
+         }
 
 
         public void NewHardwareDataReceived(double instantaneousCurrent)

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- v12.6, 6/14/2026 ScottPlot Marker complete rebuild -->
+<!-- v13.0, 6/14/2026 ScottPlot fully funtional transparent corners fillets. -->
 <Window
     x:Class="PicoPowerMonitor.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -117,10 +117,10 @@
                 </StackPanel>
 
                 <scottplot:WinUIPlot x:Name="CurrentSignaturePlot" 
-                                     Grid.Row="1" 
-                                     Margin="0,5"
-                                     HorizontalAlignment="Stretch" 
-                                     VerticalAlignment="Stretch"/>
+							Grid.Row="1" 
+							Margin="0,5"
+							HorizontalAlignment="Stretch" 
+							VerticalAlignment="Stretch"/>
 
                 <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="5,5,0,0" VerticalAlignment="Center">
                     <Ellipse Name="StatusEllipse"
