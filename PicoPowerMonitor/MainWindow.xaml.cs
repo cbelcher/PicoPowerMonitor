@@ -1,4 +1,4 @@
-// v13.0, 6/14/2026 ScottPlot fully funtional transparent corners fillets.
+// v13.1, 6/14/2026 ScottPlot Just added LabelOffset to X and Y to get it off the right edge.
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
 using ScottPlot;
@@ -379,9 +379,17 @@ namespace PicoPowerMonitor
             _valueBadge.Axes.YAxis = rightAxis;
 
             // Anchor to the middle-right data boundary
-            _valueBadge.LabelAlignment = ScottPlot.Alignment.MiddleRight;
+            // MiddleRight - Last digit just touches the right edge of the plot.
+            // LowerCenter
+            // LowerRight - If I had to guess this will work the best. Looks nearly identical to MiddleRight. But I'd say it's better.
+            // UpperRight - Last digit just touches the right edge of the plot. Looks like the text is bound the the plot from its upper right corner.
+            // UpperCenter
+            // UpperLeft
+            // LowerLeft - First digit is covered by the right edge of the plot, horrible.
+            _valueBadge.LabelAlignment = ScottPlot.Alignment.LowerRight;
             _valueBadge.LabelRotation = 0;
-
+            _valueBadge.LabelOffsetX = -20;
+            _valueBadge.LabelOffsetY = 20;
 
             // Style Marker text block
             _valueBadge.LabelStyle.BackgroundColor = ScottPlot.Color.FromARGB(0xFF00A2FF);  //Solid Blue 
