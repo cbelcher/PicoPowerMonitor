@@ -1,4 +1,4 @@
-// <!-- v12.2, 6/13/2026 Just UI Tweaks. ScottPlot not responding to Alpha Channel -->
+// <!-- v12.3, 6/13/2026 ScottPlot not responding to .xaml Alpha Channel, resolved -->
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
 using ScottPlot;
@@ -349,12 +349,23 @@ namespace PicoPowerMonitor
             CurrentSignaturePlot.Plot.Axes.ContinuouslyAutoscale = true;
 
             // Background panel color
-            CurrentSignaturePlot.Plot.FigureBackground.Color = ScottPlot.Color.FromHex("#111115");
-            CurrentSignaturePlot.Plot.DataBackground.Color = ScottPlot.Color.FromHex("#111115");
+            // CurrentSignaturePlot.Plot.FigureBackground.Color = ScottPlot.Color.FromHex("#111115");
+            // CurrentSignaturePlot.Plot.DataBackground.Color = ScottPlot.Color.FromHex("#111115");
+
+            // Background panel color with transparency
+            // SkiaSharp, doesn't take any queues from its grid Alpha Channel, so need to deal with it yourself.
+            CurrentSignaturePlot.Plot.FigureBackground.Color = ScottPlot.Color.FromARGB(0x89111115);
+            CurrentSignaturePlot.Plot.DataBackground.Color = ScottPlot.Colors.Transparent;
 
             // Grid line and label text colors
             CurrentSignaturePlot.Plot.Axes.Color(ScottPlot.Color.FromHex("#5C6370"));
+
+            // Request ScottPlot to redraw the UI with the updated array data
+            CurrentSignaturePlot.Refresh();
         }
+
+        
+
 
         public void NewHardwareDataReceived(double instantaneousCurrent)
         {

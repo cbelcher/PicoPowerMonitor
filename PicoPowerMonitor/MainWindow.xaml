@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- v12.2, 6/13/2026 Just UI Tweaks. ScottPlot not responding to Alpha Channel -->
+<!-- v12.3, 6/13/2026 ScottPlot not responding to .xaml Alpha Channel, resolved -->
 <Window
     x:Class="PicoPowerMonitor.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
