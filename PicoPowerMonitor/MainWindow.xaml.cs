@@ -1,8 +1,9 @@
-// <!-- v12.5, 6/14/2026 ScottPlot Marker works but I'm going to rebuild it -->
+// v12.6, 6/14/2026 ScottPlot Marker complete rebuild 
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
 using ScottPlot;
 using ScottPlot.Plottables;
+using ScottPlot.TickGenerators;
 using System;
 using System.IO.Ports;
 using System.Management;
@@ -26,6 +27,9 @@ namespace PicoPowerMonitor
 
         // Plot Marker Field
         private ScottPlot.Plottables.HorizontalLine? _currentValueLine;
+
+        // Next attempt at getting this Marker where I want it
+        private ScottPlot.Plottables.Text? _valueBadge;
 
         // Instantiate a instance of the ScottPlot DataStreamer class.
         private DataStreamer? _streamerPlot; 
@@ -124,8 +128,8 @@ namespace PicoPowerMonitor
                 // _backdropConfiguration.IsInputActive = args.WindowActivationState != WindowActivationState.Deactivated;
                 _backdropConfiguration.IsInputActive = true;
 
-                // FORCED FIX: Every time the window activation state cycles (like clicking/dragging),
-                // aggressively push your custom mix rules back over the OS defaults.
+                // Every time the window activation state cycles (like clicking/dragging),
+                // Have to push my custom mix rules back over the OS defaults.
                 ApplyCustomAcrylicSettings();
             }
         }
@@ -318,91 +322,78 @@ namespace PicoPowerMonitor
 
         private void InitializeGraph()
         {
+            //_streamerPlot = CurrentSignaturePlot.Plot.Add.DataStreamer(streamLength);
+
+            // Create streamer
             _streamerPlot = CurrentSignaturePlot.Plot.Add.DataStreamer(streamLength);
+            _streamerPlot.Color = ScottPlot.Colors.Blue;
+            _streamerPlot.LineWidth = 3;
+            _streamerPlot.Axes.YAxis = CurrentSignaturePlot.Plot.Axes.Right;
 
             // Removed all but Right Frame
             CurrentSignaturePlot.Plot.Axes.Bottom.FrameLineStyle.IsVisible = false;
             CurrentSignaturePlot.Plot.Axes.Top.FrameLineStyle.IsVisible = false;
             CurrentSignaturePlot.Plot.Axes.Left.FrameLineStyle.IsVisible = false;
 
-            // Plot color and width
-            _streamerPlot.Color = ScottPlot.Colors.Blue;
-            _streamerPlot.LineWidth = 3;
-
-            // Configure grid to display ticks from the right Y axis
-            _streamerPlot.Axes.YAxis = CurrentSignaturePlot.Plot.Axes.Right;
-            // Scales just fine without this next line.
-            //CurrentSignaturePlot.Plot.Grid.YAxis = CurrentSignaturePlot.Plot.Axes.Right;
-
-            // Style Right Y-Axis attributes
-            //CurrentSignaturePlot.Plot.Axes.Right.Label.Text = "Current (Amps)";
-
-            // Remove tick generator from Left Y and Bottom X Axis
+            // Remove tick generator from Left Y and Bottom X Axis - No Change
             CurrentSignaturePlot.Plot.Axes.Left.RemoveTickGenerator();
             CurrentSignaturePlot.Plot.Axes.Bottom.RemoveTickGenerator();
+
+            // New rightAxis
+            var rightAxis = CurrentSignaturePlot.Plot.Axes.Right;
+            rightAxis.FrameLineStyle.IsVisible = true;
+            rightAxis.TickLabelStyle.FontName = "Cascadia Code";
+            rightAxis.TickLabelStyle.ForeColor = ScottPlot.Color.FromHex("#5C6370");
+
+            // Hide tick marks
+            rightAxis.MajorTickStyle.Length = 0;
+            rightAxis.MinorTickStyle.Length = 0;
+
+            // Force a 1-digit after decimal
+            ((NumericAutomatic)rightAxis.TickGenerator).LabelFormatter = x => x.ToString("F1");
 
             // Hide Grid Lines
             CurrentSignaturePlot.Plot.Grid.XAxisStyle.IsVisible = false;
             CurrentSignaturePlot.Plot.Grid.YAxisStyle.IsVisible = false;
 
+
             // Configure the initial plot initial scale from 0 to 5A
             CurrentSignaturePlot.Plot.Axes.SetLimits(0, streamLength, 0, 5.0);
-            CurrentSignaturePlot.Refresh();
-
-            // Auto scale to fit the data.
             CurrentSignaturePlot.Plot.Axes.ContinuouslyAutoscale = true;
-           
+
             // Background panel color with transparency
             // SkiaSharp, doesn't take any queues from its grid Alpha Channel, so need to deal with it yourself.
             CurrentSignaturePlot.Plot.FigureBackground.Color = ScottPlot.Color.FromARGB(0x78111115);
             CurrentSignaturePlot.Plot.DataBackground.Color = ScottPlot.Colors.Transparent;
 
-            // Grid line and label text colors
-            CurrentSignaturePlot.Plot.Axes.Color(ScottPlot.Color.FromHex("#5C6370"));
-
-            // Marker Configuration
+            // Marker configuration on Right side, displaying Current X value.
             _currentValueLine = CurrentSignaturePlot.Plot.Add.HorizontalLine(0);
+            _currentValueLine.Axes.YAxis = rightAxis;
 
-            // Explicitly bind to the active Right Axis frame
-            _currentValueLine.Axes.YAxis = CurrentSignaturePlot.Plot.Axes.Right;
-
-
-            // Hide style Tracking Line entirely
-            // _currentValueLine.LineWidth = 0;
-
-            // --- THE TRICK ---
-            // Do NOT use LineWidth = 0. Instead, give it a width but make it completely invisible (Alpha = 0).
-            // This forces ScottPlot to calculate the line length to the right edge without showing a line.
-            _currentValueLine.LineWidth = 1;
-            _currentValueLine.Color = ScottPlot.Color.FromARGB(0x00000000);
+            // Hide default horizontal line
+            _currentValueLine.LineWidth = 0;
 
 
-            // Set a temp value
-            _currentValueLine.Text = "0.00";
+            // Create a dedicated text badge that sits INSIDE the data plot area
+            _valueBadge = CurrentSignaturePlot.Plot.Add.Text("0.00", streamLength, 0);
+            _valueBadge.Axes.YAxis = rightAxis;
 
-            // --- THE POSITION FIXES ---
-            // Tell the line object where its label belongs
-            // _currentValueLine.LabelAlignment = ScottPlot.Alignment.MiddleRight;
-            _currentValueLine.LabelAlignment = ScottPlot.Alignment.LowerCenter;
+            // Anchor to the middle-right data boundary
+            _valueBadge.LabelAlignment = ScottPlot.Alignment.MiddleRight;
+            _valueBadge.LabelRotation = 0;
 
-            // Tell the label's internal rendering block to anchor to the right horizontally
-            _currentValueLine.LabelStyle.Alignment = ScottPlot.Alignment.LowerCenter;
 
-            // Force it to use horizontal text rendering mode instead of vertical axis mode
-            _currentValueLine.LabelStyle.Rotation = 0;
+            // Style Marker text block
+            _valueBadge.LabelStyle.BackgroundColor = ScottPlot.Color.FromARGB(0xFF00A2FF);  //Solid Blue 
+            _valueBadge.LabelStyle.ForeColor = ScottPlot.Colors.White;
+            _valueBadge.LabelStyle.Padding = 5;
+            _valueBadge.LabelStyle.FontName = "Cascadia Code";
+            _valueBadge.LabelStyle.Bold = true;
 
-            // Force the line to explicitly pull its positioning from the right-side layout engine
-            //_currentValueLine.LabelPositionByAxisTicks = true;
 
-            // Format Marker
-            _currentValueLine.LabelStyle.BackgroundColor = ScottPlot.Colors.Blue;
-            _currentValueLine.LabelStyle.ForeColor = ScottPlot.Colors.White;
-            _currentValueLine.LabelStyle.Padding = 4;
-            _currentValueLine.LabelStyle.FontName = "Cascadia Code";
-            _currentValueLine.LabelOppositeAxis = true;
-
-            // Request ScottPlot to redraw the UI with the updated array data
+            // Initial paint
             CurrentSignaturePlot.Refresh();
+
         }
 
 
@@ -411,14 +402,14 @@ namespace PicoPowerMonitor
             // Plot new data point.
             _streamerPlot?.Add(instantaneousCurrent);
 
-            // start marker test here
-            if (_currentValueLine != null)
+            if (_currentValueLine != null && _valueBadge != null)
             {
-                // 1. Move the line and right-axis box to the exact current value
+                // Move the math coordinate plane tracker
                 _currentValueLine.Y = instantaneousCurrent;
 
-                // 2. Format the label string to match your mockup (e.g., "2.16")
-                _currentValueLine.Text = instantaneousCurrent.ToString("F2");
+                // Update the text box string and lock its position to the far-right data edge
+                _valueBadge.LabelText = instantaneousCurrent.ToString("F2");
+                _valueBadge.Location = new ScottPlot.Coordinates(streamLength, instantaneousCurrent);
             }
 
             // Scroll plot to the left as new data is placed on the right.
