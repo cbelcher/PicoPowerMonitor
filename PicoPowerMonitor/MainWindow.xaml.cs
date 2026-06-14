@@ -1,4 +1,4 @@
-// <!-- v12.3, 6/13/2026 ScottPlot not responding to .xaml Alpha Channel, resolved -->
+// <!-- v12.4, 6/14/2026 ScottPlot remove Y-Axis Label -->
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
 using ScottPlot;
@@ -331,7 +331,7 @@ namespace PicoPowerMonitor
 
             // Style Right Y-Axis attributes
             //CurrentSignaturePlot.Plot.YLabel("Current (Amps)");
-            CurrentSignaturePlot.Plot.Axes.Right.Label.Text = "Current (Amps)";
+            //CurrentSignaturePlot.Plot.Axes.Right.Label.Text = "Current (Amps)";
 
             // Remove tick generator from Left Y and Bottom X Axis
             CurrentSignaturePlot.Plot.Axes.Left.RemoveTickGenerator();

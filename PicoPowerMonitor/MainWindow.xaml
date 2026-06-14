@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- v12.3, 6/13/2026 ScottPlot not responding to .xaml Alpha Channel, resolved -->
+<!-- v12.4, 6/14/2026 ScottPlot remove Y-Axis Label -->
 <Window
     x:Class="PicoPowerMonitor.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
