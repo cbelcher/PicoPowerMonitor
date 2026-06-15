@@ -1,4 +1,4 @@
-// v14.0, 6/15/2026 Add Max Current to UI and get text to double off UI thread, it works!
+// v14.1, 6/15/2026 Tuning new UI MaxCurrentText. Previously it very distracting, your eye didn't know what to focus on.
 using Microsoft.UI.Composition;
 using Microsoft.UI.Composition.SystemBackdrops;
 using Microsoft.UI.Xaml;
@@ -38,8 +38,7 @@ namespace PicoPowerMonitor
         // Reconnect timer to handle unexpected Pico Power Monitor disconnections
         private readonly DispatcherTimer _reconnectTimer;
 
-        // 6/11/2026 pulled the plug on the Power Monitor from sending power readings, adjusting regular expression.
-        // private static readonly Regex PicoRegex = new Regex(@"V:\s*([\d.-]+),\s*I:\s*([\d.-]+),\s*P:\s*([\d.-]+)");
+        // Regular expression for parsing Monitor's data stream.
         private static readonly Regex PicoRegex = new Regex(@"V:\s*([\d.-]+),\s*I:\s*([\d.-]+)");
 
         // Fields for Acrylic Backdrop
@@ -61,11 +60,11 @@ namespace PicoPowerMonitor
 
             // Find the Pico's COM port automatically
             // Procedure attempts to find a Pico based on its USB VID:PID.
-            // If it finds one, its COMx value is stored in detected.
+            // If it finds one, COMx value is stored in variable detected.
             // This will be passed as a parameter to AutoConnect to establish a connection.
             var detected = AutoDetectPico();
 
-            // Setup a Dispatch Timer to check connection every 2 seconds
+            // Setup a Dispatch Timer to check for missing connection every 2 seconds
             _reconnectTimer = new DispatcherTimer();
             _reconnectTimer.Interval = TimeSpan.FromSeconds(2);
             _reconnectTimer.Tick += ReconnectTimer_Tick;

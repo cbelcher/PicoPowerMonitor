@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- v14.0, 6/15/2026 Add Max Current to UI and get text to double off UI thread, it works! -->
+<!-- v14.1, 6/15/2026 Tuning new UI MaxCurrentText. Previously it very distracting, your eye didn't know what to focus on. -->
 <Window
     x:Class="PicoPowerMonitor.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -85,13 +85,25 @@
                                Foreground="#E06C75" 
                                Margin="15,10,0,0" 
                                VerticalAlignment="Center"/>
-                    <TextBlock x:Name="MaxCurrentText"
-                               Text="0.000"
-                               FontSize="64"
-                               FontFamily="Cascadia Code"
-                               FontWeight="Normal"
-                               Margin="48,10,0,0"
-                               Foreground="White"/>
+                    
+                    <StackPanel Orientation="Vertical"
+                                Margin="64,15,0,0"
+                                VerticalAlignment="Center">
+
+                        <TextBlock Text="MAX PEAK"
+                                   FontSize="12"
+                                   FontFamily="Cascadia Code"
+                                   FontWeight="Bold"
+                                   Foreground="#8A93A7"
+                                   Margin="2,0,0,0"/>
+
+                        <TextBlock x:Name="MaxCurrentText"
+                                   Text="0.000"
+                                   FontSize="36"
+                                   FontFamily="Cascadia Code"
+                                   FontWeight="Normal"
+                                   Foreground="#E5C07B"/>
+                    </StackPanel>
                 </StackPanel>
             </Grid>
         </Border>
