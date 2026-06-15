@@ -1,15 +1,16 @@
-// v13.1, 6/14/2026 ScottPlot Just added LabelOffset to X and Y to get it off the right edge.
+// v14.0, 6/15/2026 Add Max Current to UI and get text to double off UI thread, it works!
+using Microsoft.UI.Composition;
+using Microsoft.UI.Composition.SystemBackdrops;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
 using ScottPlot;
 using ScottPlot.Plottables;
 using ScottPlot.TickGenerators;
 using System;
+using System.Diagnostics;
 using System.IO.Ports;
 using System.Management;
 using System.Text.RegularExpressions;
-using Microsoft.UI.Composition;
-using Microsoft.UI.Composition.SystemBackdrops;
 using WinRT;
 
 
@@ -25,10 +26,10 @@ namespace PicoPowerMonitor
         // How many data points are show at one on the plot.
         private readonly int streamLength = 50;
 
-        // Plot Marker Field
+        // Plot Marker X coordinate tracking line field
         private ScottPlot.Plottables.HorizontalLine? _currentValueLine;
 
-        // Next attempt at getting this Marker where I want it
+        // Plot Marker Text Badge Field
         private ScottPlot.Plottables.Text? _valueBadge;
 
         // Instantiate a instance of the ScottPlot DataStreamer class.
@@ -45,6 +46,8 @@ namespace PicoPowerMonitor
         private DesktopAcrylicController? _acrylicController;
         private SystemBackdropConfiguration? _backdropConfiguration;
 
+        // Tracks the highest peak current
+        private double _maxCurrent = double.MinValue;
 
         public MainWindow()
         {
@@ -286,20 +289,55 @@ namespace PicoPowerMonitor
                 {
                     string v = match.Groups[1].Value;
                     string i = match.Groups[2].Value;
-                    // Removed Power Output, just not needed.
-                    //string p = match.Groups[3].Value;
 
-                    DispatcherQueue.TryEnqueue(() => {
-                        VoltageText?.Text = v;
-                        CurrentText?.Text = i;
+                    // Plot requires a double.
+                    // Originally had this in the UI thread (Not good).  Now I need it for max current tracking.
+                    // Let's kill two birds with one stone, give me a double to work out if we have a new max
+                    // and pull this in the background thread.
+                    if (double.TryParse(i, out double currentValue))
+                    {
+                        // Boolean used to monitor change in max current
+                        bool isNewMax = false;
 
-
-                        // Convert current string to double and pass to NewHardwareDataReceived to update plot.
-                        if (double.TryParse(i, out double currentValue))
+                        // Check if current value is a new max, now on the background thread.
+                        if (currentValue > _maxCurrent)
                         {
-                            NewHardwareDataReceived(currentValue);
+                            _maxCurrent = currentValue;
+                            isNewMax = true; // Flag that we need to update the Max UI block
                         }
-                    });
+
+                        // Hand over data updates to the UI thread.
+                    
+                        DispatcherQueue.TryEnqueue(() => {
+                            VoltageText?.Text = v;
+                            CurrentText?.Text = i;
+
+                            // Pass the currentValue to ScottPlot update function.
+                            NewHardwareDataReceived(currentValue);
+
+                            // If this is a new max current, update the MaxCurrentText UI block.
+                            if (isNewMax)
+                            {
+                                // Using "F3" format to match your clean 3-decimal precision setup
+                                MaxCurrentText.Text = _maxCurrent.ToString("F3");
+                                Debug.WriteLine($"Text that will be seen in MaxCurrentText.txt: {_maxCurrent.ToString("F3")}");
+                            }
+                            // Convert current string to double and pass to NewHardwareDataReceived to update plot.
+                            // Moving to background thread, this is now being computed on the UI thread.
+                            // if (double.TryParse(i, out double currentValue))
+                            //{
+                            //NewHardwareDataReceived(currentValue);
+                            //}
+                        });
+                    }
+                    else
+                    {
+                        // If parsing fails, still push string to UI.
+                        DispatcherQueue.TryEnqueue(() => {
+                            VoltageText?.Text = v;
+                            CurrentText?.Text = i;
+                        });
+                    }
                 }
             }
             catch (Exception)
@@ -370,7 +408,7 @@ namespace PicoPowerMonitor
             _currentValueLine = CurrentSignaturePlot.Plot.Add.HorizontalLine(0);
             _currentValueLine.Axes.YAxis = rightAxis;
 
-            // Hide default horizontal line
+            // Hide default marker horizontal line
             _currentValueLine.LineWidth = 0;
 
 
@@ -417,7 +455,8 @@ namespace PicoPowerMonitor
                 // Move the math coordinate plane tracker
                 _currentValueLine.Y = instantaneousCurrent;
 
-                // Update the text box string and lock its position to the far-right data edge
+                // Update the Plot Marker Label TextBox string, format with 2 decimal places.
+                // Lock its position to the Right Edge of the Plot.
                 _valueBadge.LabelText = instantaneousCurrent.ToString("F2");
                 _valueBadge.Location = new ScottPlot.Coordinates(streamLength, instantaneousCurrent);
             }
