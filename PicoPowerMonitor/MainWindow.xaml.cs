@@ -1,4 +1,4 @@
-// v15.0, 6/15/2026 Added Reset button to allow user to reset MaxCurrentText.
+// v15.1, 6/15/2026 Minor UI changes to Max Current StackPanel.
 using Microsoft.UI.Composition;
 using Microsoft.UI.Composition.SystemBackdrops;
 using Microsoft.UI.Xaml;
