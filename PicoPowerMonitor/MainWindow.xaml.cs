@@ -1,4 +1,4 @@
-// v16.1, 6/15/2026 Updated Regular expression to utilize RegexGenerator source generator.
+// v16.3, 6/15/2026 Cleaning up IDE messages
 using Microsoft.UI.Composition.SystemBackdrops;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
@@ -34,7 +34,7 @@ namespace PicoPowerMonitor
         private DataStreamer? _streamerPlot;
 
         // Reconnect timer to handle unexpected Pico Power Monitor disconnections
-        private readonly DispatcherTimer _reconnectTimer;
+        private readonly DispatcherTimer? _reconnectTimer;
 
         // Regular expression for parsing Monitor's data stream.
         // private static readonly Regex PicoRegex = new(@"V:\s*([\d.-]+),\s*I:\s*([\d.-]+)");
@@ -67,16 +67,18 @@ namespace PicoPowerMonitor
             var detected = AutoDetectPico();
 
             // Setup a Dispatch Timer to check for missing connection every 2 seconds
-            _reconnectTimer = new DispatcherTimer();
-            _reconnectTimer.Interval = TimeSpan.FromSeconds(2);
-            _reconnectTimer.Tick += ReconnectTimer_Tick;
+            //_reconnectTimer = new DispatcherTimer();
+            DispatcherTimer dispatcherTimer = new();
+            _reconnectTimer = dispatcherTimer;
+            _reconnectTimer?.Interval = TimeSpan.FromSeconds(2);
+            _reconnectTimer?.Tick += ReconnectTimer_Tick;
 
             // Function will make a serial connection if passed a COM port.
             AutoConnect(detected);
 
             this.Closed += (s, e) =>
             {
-                _reconnectTimer.Stop();
+                _reconnectTimer?.Stop();
                 ClosePort();
             };
 
@@ -141,11 +143,9 @@ namespace PicoPowerMonitor
 
         private void Window_Closed(object sender, WindowEventArgs args)
         {
-            if (_acrylicController != null)
-            {
-                _acrylicController.Dispose();
-                _acrylicController = null;
-            }
+            _acrylicController?.Dispose();
+            _acrylicController = null;
+
             this.Activated -= Window_Activated;
             _backdropConfiguration = null;
         }
@@ -155,9 +155,10 @@ namespace PicoPowerMonitor
         {
             try
             {
-                using (var searcher = new ManagementObjectSearcher("SELECT * FROM Win32_PnPEntity WHERE Caption LIKE '%(COM%)'"))
-                {
-                    var ports = searcher.Get();
+                //using (var searcher = new ManagementObjectSearcher("SELECT * FROM Win32_PnPEntity WHERE Caption LIKE '%(COM%)'"))
+                //{
+                using var searcher = new ManagementObjectSearcher("SELECT * FROM Win32_PnPEntity WHERE Caption LIKE '%(COM%)'");
+                var ports = searcher.Get();
                     foreach (var port in ports)
                     {
                         string? hardwareId = port["PNPDeviceID"]?.ToString();
@@ -182,7 +183,7 @@ namespace PicoPowerMonitor
                             }
                         }
                     }
-                }
+                //}
             }
             catch (Exception ex)
             {
@@ -198,13 +199,13 @@ namespace PicoPowerMonitor
             {
                 // Found a Pico on a COM port.  Start the reconnect timer and attempt a connection.
                 _targetPort = selected;
-                _reconnectTimer.Start();
+                _reconnectTimer?.Start();
                 TryConnect();
             }
             else
             {
                 // Didn't find a Pico on any COM port.  Start the reconnect timer and keep trying.
-                _reconnectTimer.Start();
+                _reconnectTimer?.Start();
             }
         }
 
