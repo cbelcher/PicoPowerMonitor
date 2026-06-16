@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- v16.4, 6/15/2026 Updated source generator method for parsing COM ports -->
+<!-- v16.5, 6/15/2026 One last Simplification message cleared. -->
 <Window
     x:Class="PicoPowerMonitor.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"

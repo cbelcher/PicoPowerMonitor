@@ -1,4 +1,4 @@
-// v16.4, 6/15/2026 Updated source generator method for parsing COM ports
+// v16.5, 6/15/2026 One last Simplification message cleared.
 using Microsoft.UI.Composition.SystemBackdrops;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
@@ -221,9 +221,11 @@ namespace PicoPowerMonitor
             {
                 if (string.IsNullOrEmpty(_targetPort)) return;
                 ClosePort();
-                _picoPort = new SerialPort(_targetPort, 115200);
-                _picoPort.DtrEnable = true; // Required for Pico USB
-                _picoPort.RtsEnable = true;
+                _picoPort = new SerialPort(_targetPort, 115200)
+                {
+                    DtrEnable = true, // Required for Pico USB
+                    RtsEnable = true
+                };
                 _picoPort.DataReceived += SerialPort_DataReceived;
                 _picoPort.Open();
 
