@@ -1,4 +1,4 @@
-// v16.1, 6/15/2026 Had to lock it down further, Button and MAX PEAK were now shifting left and right.
+// v16.1, 6/15/2026 Updated Regular expression to utilize RegexGenerator source generator.
 using Microsoft.UI.Composition.SystemBackdrops;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
@@ -37,7 +37,11 @@ namespace PicoPowerMonitor
         private readonly DispatcherTimer _reconnectTimer;
 
         // Regular expression for parsing Monitor's data stream.
-        private static readonly Regex PicoRegex = new Regex(@"V:\s*([\d.-]+),\s*I:\s*([\d.-]+)");
+        // private static readonly Regex PicoRegex = new(@"V:\s*([\d.-]+),\s*I:\s*([\d.-]+)");
+
+        // Updated Regular Expression decleration from pre .NET 7 code to new Regex source generator
+        [GeneratedRegex(@"V:\s*([\d.-]+),\s*I:\s*([\d.-]+)", RegexOptions.IgnoreCase, "en-US")]
+        private static partial Regex PicoRegexGeneratedRegex();
 
         // Fields for Acrylic Backdrop
         private DesktopAcrylicController? _acrylicController;
@@ -275,7 +279,10 @@ namespace PicoPowerMonitor
                 if (port == null) return;
 
                 string line = port.ReadLine();
-                Match match = PicoRegex.Match(line);
+                // using new .NET source generator
+                Match match = PicoRegexGeneratedRegex().Match(line);
+                // I was using pre .NET 7 method
+                // Match match = PicoRegex.Match(line);
 
                 if (match.Success)
                 {

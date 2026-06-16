@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- v16.1, 6/15/2026 Had to lock it down further, Button and MAX PEAK were now shifting left and right. -->
+<!-- v16.2, 6/15/2026 Updated Regular expression to utilize RegexGenerator source generator. -->
 <Window
     x:Class="PicoPowerMonitor.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
