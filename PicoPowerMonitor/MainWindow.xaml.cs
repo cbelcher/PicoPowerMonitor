@@ -1,4 +1,4 @@
-// v16.5, 6/15/2026 One last Simplification message cleared.
+// v16.6, 6/15/2026 Cleaning up comments
 using Microsoft.UI.Composition.SystemBackdrops;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
@@ -39,7 +39,7 @@ namespace PicoPowerMonitor
         // Regular expression for parsing Monitor's data stream.
         // private static readonly Regex PicoRegex = new(@"V:\s*([\d.-]+),\s*I:\s*([\d.-]+)");
 
-        // Updated Regular Expression decleration from pre .NET 7 code to new Regex source generator
+        // Updated Regular Expression deceleration from pre .NET 7 code to new Regex source generator
         [GeneratedRegex(@"V:\s*([\d.-]+),\s*I:\s*([\d.-]+)", RegexOptions.IgnoreCase, "en-US")]
         private static partial Regex PicoRegexGeneratedRegex();
 
@@ -159,8 +159,6 @@ namespace PicoPowerMonitor
         {
             try
             {
-                //using (var searcher = new ManagementObjectSearcher("SELECT * FROM Win32_PnPEntity WHERE Caption LIKE '%(COM%)'"))
-                //{
                 using var searcher = new ManagementObjectSearcher("SELECT * FROM Win32_PnPEntity WHERE Caption LIKE '%(COM%)'");
                 var ports = searcher.Get();
                     foreach (var port in ports)
@@ -189,7 +187,6 @@ namespace PicoPowerMonitor
                             }
                         }
                     }
-                //}
             }
             catch (Exception ex)
             {
@@ -233,7 +230,7 @@ namespace PicoPowerMonitor
                 if (StatusText != null)
                 {
                     StatusText.Text = $"Connected on {_targetPort}.";
-                    // StatusText and Ellispse to Green to indicate successful connection.  Changed 6/13/2026
+                    // StatusText and Ellipse to Green to indicate successful connection.
                     StatusText.Foreground = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 61, 157, 36));
                     StatusEllipse.Fill = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 61, 157, 36));
                 }
