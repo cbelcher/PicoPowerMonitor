@@ -1,4 +1,4 @@
-// v14.1, 6/15/2026 Tuning new UI MaxCurrentText. Previously it very distracting, your eye didn't know what to focus on.
+// v15.0, 6/15/2026 Added Reset button to allow user to reset MaxCurrentText.
 using Microsoft.UI.Composition;
 using Microsoft.UI.Composition.SystemBackdrops;
 using Microsoft.UI.Xaml;
@@ -33,7 +33,7 @@ namespace PicoPowerMonitor
         private ScottPlot.Plottables.Text? _valueBadge;
 
         // Instantiate a instance of the ScottPlot DataStreamer class.
-        private DataStreamer? _streamerPlot; 
+        private DataStreamer? _streamerPlot;
 
         // Reconnect timer to handle unexpected Pico Power Monitor disconnections
         private readonly DispatcherTimer _reconnectTimer;
@@ -51,12 +51,12 @@ namespace PicoPowerMonitor
         public MainWindow()
         {
             this.InitializeComponent();
-            
+
             // Initialize ScottPlot Current Plot - Added 6/10/2026
             InitializeGraph();
 
             // Adjusted for new Vertical layout. Changed 6/12/2026
-             this.AppWindow.Resize(new Windows.Graphics.SizeInt32(630, 712));
+            this.AppWindow.Resize(new Windows.Graphics.SizeInt32(630, 712));
 
             // Find the Pico's COM port automatically
             // Procedure attempts to find a Pico based on its USB VID:PID.
@@ -72,7 +72,8 @@ namespace PicoPowerMonitor
             // Function will make a serial connection if passed a COM port.
             AutoConnect(detected);
 
-            this.Closed += (s, e) => {
+            this.Closed += (s, e) =>
+            {
                 _reconnectTimer.Stop();
                 ClosePort();
             };
@@ -306,8 +307,9 @@ namespace PicoPowerMonitor
                         }
 
                         // Hand over data updates to the UI thread.
-                    
-                        DispatcherQueue.TryEnqueue(() => {
+
+                        DispatcherQueue.TryEnqueue(() =>
+                        {
                             VoltageText?.Text = v;
                             CurrentText?.Text = i;
 
@@ -332,7 +334,8 @@ namespace PicoPowerMonitor
                     else
                     {
                         // If parsing fails, still push string to UI.
-                        DispatcherQueue.TryEnqueue(() => {
+                        DispatcherQueue.TryEnqueue(() =>
+                        {
                             VoltageText?.Text = v;
                             CurrentText?.Text = i;
                         });
@@ -441,7 +444,7 @@ namespace PicoPowerMonitor
 
             // Initial paint
             CurrentSignaturePlot.Refresh();
-         }
+        }
 
 
         public void NewHardwareDataReceived(double instantaneousCurrent)
@@ -466,6 +469,10 @@ namespace PicoPowerMonitor
             CurrentSignaturePlot.Refresh();
         }
 
-
+        public void ResetMaxCurrent_Click(object sender, RoutedEventArgs e)
+        {
+            _maxCurrent = double.MinValue;
+            MaxCurrentText.Text = "0.000";
+        }
     }
 }

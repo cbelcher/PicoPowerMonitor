@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- v14.1, 6/15/2026 Tuning new UI MaxCurrentText. Previously it very distracting, your eye didn't know what to focus on. -->
+<!-- v15.0, 6/15/2026 Added Reset button to allow user to reset MaxCurrentText. -->
 <Window
     x:Class="PicoPowerMonitor.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -103,6 +103,13 @@
                                    FontFamily="Cascadia Code"
                                    FontWeight="Normal"
                                    Foreground="#E5C07B"/>
+                        
+                        <Button Content="Reset"
+                                FontSize="12"
+                                FontFamily="Cascadia Code"
+                                Margin="0,5,0,0"
+                                Padding="6,2"
+                                Click="ResetMaxCurrent_Click"/>
                     </StackPanel>
                 </StackPanel>
             </Grid>
