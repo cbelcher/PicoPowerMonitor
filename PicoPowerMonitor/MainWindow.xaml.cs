@@ -1,5 +1,4 @@
-// v16.0, 6/15/2026 Locking down Max Current to its own Grid.Column. It was bouncing left and right.
-using Microsoft.UI.Composition;
+// v16.1, 6/15/2026 Had to lock it down further, Button and MAX PEAK were now shifting left and right.
 using Microsoft.UI.Composition.SystemBackdrops;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
@@ -7,7 +6,6 @@ using ScottPlot;
 using ScottPlot.Plottables;
 using ScottPlot.TickGenerators;
 using System;
-using System.Diagnostics;
 using System.IO.Ports;
 using System.Management;
 using System.Text.RegularExpressions;
@@ -18,7 +16,7 @@ namespace PicoPowerMonitor
 {
     public sealed partial class MainWindow : Window
     {
-        // field declarations
+        // field declarations for Pico's Serial Connection
         private SerialPort? _picoPort;
         private string? _targetPort;
 
@@ -52,10 +50,10 @@ namespace PicoPowerMonitor
         {
             this.InitializeComponent();
 
-            // Initialize ScottPlot Current Plot - Added 6/10/2026
+            // Initialize ScottPlot Current Plot
             InitializeGraph();
 
-            // Adjusted for new Vertical layout. Changed 6/12/2026
+            // Adjusted for new Vertical layout.
             this.AppWindow.Resize(new Windows.Graphics.SizeInt32(630, 712));
 
             // Find the Pico's COM port automatically
@@ -79,7 +77,8 @@ namespace PicoPowerMonitor
             };
 
             // Set up the persistent Desktop Acrylic Backdrop.
-            // OS will try to override tint/opacity settings when window is moved, have to reapply after every activation.
+            // OS will try to override tint/opacity settings when window is moved or loses focus
+            // have to reapply after every activation.
             ConfigurePersistentAcrylic();
         }
 
@@ -128,7 +127,6 @@ namespace PicoPowerMonitor
             {
                 // Keeps track of window focus changes
                 // Forced this True. Without it, the app would revert to defaults if it went out of focus.
-                // _backdropConfiguration.IsInputActive = args.WindowActivationState != WindowActivationState.Deactivated;
                 _backdropConfiguration.IsInputActive = true;
 
                 // Every time the window activation state cycles (like clicking/dragging),
@@ -145,11 +143,10 @@ namespace PicoPowerMonitor
                 _acrylicController = null;
             }
             this.Activated -= Window_Activated;
-            // _configurationSource = null;
             _backdropConfiguration = null;
         }
 
-        // Auto-detect the Pico's COM port by looking for its unique VID/PID in the system's PnP devices
+        // Auto-detect the Pico's COM port by looking for its unique VID/PID.
         private string? AutoDetectPico()
         {
             try
@@ -162,15 +159,10 @@ namespace PicoPowerMonitor
                         string? hardwareId = port["PNPDeviceID"]?.ToString();
                         string? caption = port["Caption"]?.ToString();
 
-                        // Just Changed RP2040's and this one has PID of 101F, all the documentation says it should be 0005.
-                        // Got out Microscope and sure enough, the USB-Serial chips are different.
-                        // I have 6 of them, Some are:
-                        // Chip LOGO: BYT with 2 squares around it.
+                        // USB PID's I've seen from different RP2040's.
                         // BYQ16E had PID: 0005
                         // FQ16ES Had PID: 101F.
-                        // Couple I can even read the markings on the chip.
-                        // Updated code to look for either PID.
-
+                        
                         if (!string.IsNullOrEmpty(hardwareId) &&
                             hardwareId.Contains("VID_2E8A") &&
                             (hardwareId.Contains("PID_0005") || hardwareId.Contains("PID_101F")) &&
@@ -178,7 +170,7 @@ namespace PicoPowerMonitor
                         {
                             var m = Regex.Match(caption, @"\((COM\d+)\)");
                             // if (m.Success) return m.Groups[1].Value;
-                            // Set selected to string from m.Groups[1].Value.  This string just contains COMx, no parenthesis.
+                            // This string just contains COMx, no parenthesis.
                             if (m.Success)
                             {
                                 var selected = m.Groups[1].Value;
@@ -290,10 +282,8 @@ namespace PicoPowerMonitor
                     string v = match.Groups[1].Value;
                     string i = match.Groups[2].Value;
 
-                    // Plot requires a double.
-                    // Originally had this in the UI thread (Not good).  Now I need it for max current tracking.
-                    // Let's kill two birds with one stone, give me a double to work out if we have a new max
-                    // and pull this in the background thread.
+                    // Plot and max current tracking require a doubles.
+                    // 
                     if (double.TryParse(i, out double currentValue))
                     {
                         // Boolean used to monitor change in max current
@@ -303,11 +293,10 @@ namespace PicoPowerMonitor
                         if (currentValue > _maxCurrent)
                         {
                             _maxCurrent = currentValue;
-                            isNewMax = true; // Flag that we need to update the Max UI block
+                            isNewMax = true;
                         }
 
                         // Hand over data updates to the UI thread.
-
                         DispatcherQueue.TryEnqueue(() =>
                         {
                             VoltageText?.Text = v;
@@ -319,16 +308,9 @@ namespace PicoPowerMonitor
                             // If this is a new max current, update the MaxCurrentText UI block.
                             if (isNewMax)
                             {
-                                // Using "F3" format to match your clean 3-decimal precision setup
+                                // Format to 3-decimal
                                 MaxCurrentText.Text = _maxCurrent.ToString("F3");
-                                Debug.WriteLine($"Text that will be seen in MaxCurrentText.txt: {_maxCurrent.ToString("F3")}");
                             }
-                            // Convert current string to double and pass to NewHardwareDataReceived to update plot.
-                            // Moving to background thread, this is now being computed on the UI thread.
-                            // if (double.TryParse(i, out double currentValue))
-                            //{
-                            //NewHardwareDataReceived(currentValue);
-                            //}
                         });
                     }
                     else
@@ -362,8 +344,6 @@ namespace PicoPowerMonitor
 
         private void InitializeGraph()
         {
-            //_streamerPlot = CurrentSignaturePlot.Plot.Add.DataStreamer(streamLength);
-
             // Create streamer
             _streamerPlot = CurrentSignaturePlot.Plot.Add.DataStreamer(streamLength);
             _streamerPlot.Color = ScottPlot.Colors.Blue;
@@ -375,7 +355,7 @@ namespace PicoPowerMonitor
             CurrentSignaturePlot.Plot.Axes.Top.FrameLineStyle.IsVisible = false;
             CurrentSignaturePlot.Plot.Axes.Left.FrameLineStyle.IsVisible = false;
 
-            // Remove tick generator from Left Y and Bottom X Axis - No Change
+            // Remove tick generator from Left Y and Bottom X Axis
             CurrentSignaturePlot.Plot.Axes.Left.RemoveTickGenerator();
             CurrentSignaturePlot.Plot.Axes.Bottom.RemoveTickGenerator();
 
@@ -389,20 +369,19 @@ namespace PicoPowerMonitor
             rightAxis.MajorTickStyle.Length = 0;
             rightAxis.MinorTickStyle.Length = 0;
 
-            // Force a 1-digit after decimal
+            // Force Right Axis to 1-digit after decimal
             ((NumericAutomatic)rightAxis.TickGenerator).LabelFormatter = x => x.ToString("F1");
 
             // Hide Grid Lines
             CurrentSignaturePlot.Plot.Grid.XAxisStyle.IsVisible = false;
             CurrentSignaturePlot.Plot.Grid.YAxisStyle.IsVisible = false;
 
-
             // Configure the initial plot initial scale from 0 to 5A
             CurrentSignaturePlot.Plot.Axes.SetLimits(0, streamLength, 0, 5.0);
             CurrentSignaturePlot.Plot.Axes.ContinuouslyAutoscale = true;
 
             // Background panel color with transparency
-            // SkiaSharp, doesn't take any queues from its grid Alpha Channel, so need to deal with it yourself.
+            // SkiaSharp, doesn't take any queues from the grids Alpha Channel, so need to deal with it yourself.
             CurrentSignaturePlot.Plot.FigureBackground.Color = ScottPlot.Color.FromARGB(0x78111115);
             CurrentSignaturePlot.Plot.DataBackground.Color = ScottPlot.Colors.Transparent;
 
@@ -410,26 +389,18 @@ namespace PicoPowerMonitor
             _currentValueLine = CurrentSignaturePlot.Plot.Add.HorizontalLine(0);
             _currentValueLine.Axes.YAxis = rightAxis;
 
-            // Hide default marker horizontal line
+            // Hide default marker line
             _currentValueLine.LineWidth = 0;
 
-
-            // Create a dedicated text badge that sits INSIDE the data plot area
+            // Create a Marker text badge that sits INSIDE the data plot area
             _valueBadge = CurrentSignaturePlot.Plot.Add.Text("0.00", streamLength, 0);
             _valueBadge.Axes.YAxis = rightAxis;
 
-            // Anchor to the middle-right data boundary
-            // MiddleRight - Last digit just touches the right edge of the plot.
-            // LowerCenter
-            // LowerRight - If I had to guess this will work the best. Looks nearly identical to MiddleRight. But I'd say it's better.
-            // UpperRight - Last digit just touches the right edge of the plot. Looks like the text is bound the the plot from its upper right corner.
-            // UpperCenter
-            // UpperLeft
-            // LowerLeft - First digit is covered by the right edge of the plot, horrible.
+            // Anchor Marker using its LowerRight corner.
             _valueBadge.LabelAlignment = ScottPlot.Alignment.LowerRight;
             _valueBadge.LabelRotation = 0;
-            _valueBadge.LabelOffsetX = -20;
-            _valueBadge.LabelOffsetY = 20;
+            _valueBadge.LabelOffsetX = -30;
+            _valueBadge.LabelOffsetY = 30;
 
             // Style Marker text block
             _valueBadge.LabelStyle.BackgroundColor = ScottPlot.Color.FromARGB(0xFF00A2FF);  //Solid Blue 
@@ -442,7 +413,7 @@ namespace PicoPowerMonitor
             CurrentSignaturePlot.Plot.FigureBackground.Color = ScottPlot.Colors.Transparent;
             CurrentSignaturePlot.Plot.DataBackground.Color = ScottPlot.Colors.Transparent;
 
-            // Initial paint
+            // Initial plot paint
             CurrentSignaturePlot.Refresh();
         }
 

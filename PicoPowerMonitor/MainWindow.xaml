@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- v16.0, 6/15/2026 Locking down Max Current to its own Grid.Column. It was bouncing left and right. -->
+<!-- v16.1, 6/15/2026 Had to lock it down further, Button and MAX PEAK were now shifting left and right. -->
 <Window
     x:Class="PicoPowerMonitor.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -90,20 +90,27 @@
                                    VerticalAlignment="Center"/>
                     </StackPanel>
 
-                    <StackPanel Grid.Column="1" 
-                                Orientation="Vertical" 
-                                HorizontalAlignment="Right" 
-                                Margin="0,0,16,0" 
-                                VerticalAlignment="Center">
+                    <Grid Grid.Column="1" 
+                          Width="140"
+                          HorizontalAlignment="Right" 
+                          Margin="0,0,16,0"
+                          VerticalAlignment="Center">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
 
-                        <TextBlock Text="MAX PEAK"
+                        <TextBlock Grid.Row="0"
+                                   Text="MAX PEAK"
                                    FontSize="12"
                                    FontFamily="Cascadia Code"
                                    FontWeight="Bold"
                                    Foreground="#8A93A7"
                                    HorizontalAlignment="Center"/>
 
-                        <TextBlock x:Name="MaxCurrentText"
+                        <TextBlock Grid.Row="1"
+                                   x:Name="MaxCurrentText"
                                    Text="0.000"
                                    FontSize="36"
                                    FontFamily="Cascadia Code"
@@ -111,7 +118,8 @@
                                    Foreground="#E5C07B"
                                    HorizontalAlignment="Center"/>
 
-                        <Button Content="Reset"
+                        <Button Grid.Row="2"
+                                Content="Reset"
                                 FontSize="14"
                                 FontFamily="Cascadia Code"
                                 Margin="0,8,0,0"
@@ -119,7 +127,7 @@
                                 CornerRadius="12"
                                 HorizontalAlignment="Center"
                                 Click="ResetMaxCurrent_Click"/>
-                    </StackPanel>
+                    </Grid>
                 </Grid>
             </Grid>
         </Border>
