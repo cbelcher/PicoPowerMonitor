@@ -1,4 +1,4 @@
-// v16.3, 6/15/2026 Cleaning up IDE messages
+// v16.4, 6/15/2026 Updated source generator method for parsing COM ports
 using Microsoft.UI.Composition.SystemBackdrops;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
@@ -42,6 +42,10 @@ namespace PicoPowerMonitor
         // Updated Regular Expression decleration from pre .NET 7 code to new Regex source generator
         [GeneratedRegex(@"V:\s*([\d.-]+),\s*I:\s*([\d.-]+)", RegexOptions.IgnoreCase, "en-US")]
         private static partial Regex PicoRegexGeneratedRegex();
+
+        // Another Regular expression for parsing the COM Port.
+        [GeneratedRegex(@"\((COM\d+)\)", RegexOptions.IgnoreCase, "en-US")]
+        private static partial Regex COMPortRegexGeneratedRegex();
 
         // Fields for Acrylic Backdrop
         private DesktopAcrylicController? _acrylicController;
@@ -173,7 +177,9 @@ namespace PicoPowerMonitor
                             (hardwareId.Contains("PID_0005") || hardwareId.Contains("PID_101F")) &&
                             !string.IsNullOrEmpty(caption))
                         {
-                            var m = Regex.Match(caption, @"\((COM\d+)\)");
+                            // Updated source generator method for parsing COM port from the device caption string.
+                            var m = COMPortRegexGeneratedRegex().Match(caption);
+                            
                             // if (m.Success) return m.Groups[1].Value;
                             // This string just contains COMx, no parenthesis.
                             if (m.Success)
