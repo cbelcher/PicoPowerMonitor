@@ -1,4 +1,5 @@
-// v16.6, 6/15/2026 Cleaning up comments
+// v16.7 6/18/2026 Firsh Publish and test.
+// v17.0, 6/19/2026 Adding Global Unhandled Exception routine to dump exception details.
 using Microsoft.UI.Composition.SystemBackdrops;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;

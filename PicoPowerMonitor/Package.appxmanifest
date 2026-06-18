@@ -10,8 +10,8 @@
 
   <Identity
     Name="01408516-2262-4dd2-beec-edc6f77e46f2"
-    Publisher="CN=CraigBelcher"
-    Version="1.0.0.0" />
+    Publisher="CN=Craig&apos;s Lab"
+    Version="16.6.0.0" />
 
   <mp:PhoneIdentity PhoneProductId="01408516-2262-4dd2-beec-edc6f77e46f2" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
