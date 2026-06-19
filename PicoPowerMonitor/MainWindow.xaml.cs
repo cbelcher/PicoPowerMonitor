@@ -1,4 +1,4 @@
-// v17.0, 6/19/2026 Adding Global Unhandled Exception routine to dump exception details.
+// v17.1, 6/19/2026 General cleanup before making Public.
 using Microsoft.UI.Composition.SystemBackdrops;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -142,7 +142,7 @@ namespace PicoPowerMonitor
         {
             if (_acrylicController != null)
             {
-                // Lock in your preferred deep dashboard color tone (#1E1E24)
+                // Dashboard color tone (#1E1E24)
                 _acrylicController.TintColor = Windows.UI.Color.FromArgb(255, 30, 30, 36);
 
                 // Force your targeted opacity settings to stay bound
@@ -215,7 +215,7 @@ namespace PicoPowerMonitor
             return null;
         }
 
-        // Procedure if passed a COM port.  Will attempt to connect to that COM port and update the status text if successful.
+        // Attempt to connect to passed COM port, update the status text if successful.
         private void AutoConnect(string? selected)
         {
             if (!string.IsNullOrEmpty(selected))

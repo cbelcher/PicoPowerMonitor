@@ -27,10 +27,6 @@
   </ItemGroup>
 
   <!-- Exclude local editor/backup files from compilation to avoid duplicate type errors -->
-  <ItemGroup>
-	<Page Remove="Version Backups\**\*.xaml" />
-    <Compile Remove="Version Backups\**\*.cs" />
-  </ItemGroup>
 
   <ItemGroup>
     <Manifest Include="$(ApplicationManifest)" />
