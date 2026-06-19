@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- v16.7 6/18/2026 Firsh Publish and test. -->
+<!-- v17.0, 6/19/2026 Adding Global Unhandled Exception routine to dump exception details. -->
 <Window
     x:Class="PicoPowerMonitor.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"

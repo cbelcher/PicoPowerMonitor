@@ -1,7 +1,7 @@
-// v16.7 6/18/2026 Firsh Publish and test.
 // v17.0, 6/19/2026 Adding Global Unhandled Exception routine to dump exception details.
 using Microsoft.UI.Composition.SystemBackdrops;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using ScottPlot;
 using ScottPlot.Plottables;
@@ -37,9 +37,6 @@ namespace PicoPowerMonitor
         // Reconnect timer to handle unexpected Pico Power Monitor disconnections
         private readonly DispatcherTimer? _reconnectTimer;
 
-        // Regular expression for parsing Monitor's data stream.
-        // private static readonly Regex PicoRegex = new(@"V:\s*([\d.-]+),\s*I:\s*([\d.-]+)");
-
         // Updated Regular Expression deceleration from pre .NET 7 code to new Regex source generator
         [GeneratedRegex(@"V:\s*([\d.-]+),\s*I:\s*([\d.-]+)", RegexOptions.IgnoreCase, "en-US")]
         private static partial Regex PicoRegexGeneratedRegex();
@@ -58,6 +55,28 @@ namespace PicoPowerMonitor
         public MainWindow()
         {
             this.InitializeComponent();
+
+            // Global Unhandled Exception Handler to catch, display, and log exceptions that aren't caught elsewhere.
+            AppDomain.CurrentDomain.UnhandledException += (sender, args) =>
+            {
+                if (args.ExceptionObject is Exception ex)
+                {
+                    string desktopPath = System.Environment.GetFolderPath(System.Environment.SpecialFolder.Desktop);
+                    System.IO.File.WriteAllText(System.IO.Path.Combine(desktopPath, "crash_log.txt"), args.ExceptionObject?.ToString());
+                    // Display the exception details in a message box
+                    DispatcherQueue.TryEnqueue(() =>
+                    {
+                        var dialog = new ContentDialog
+                        {
+                            Title = "Unhandled Exception",
+                            Content = $"An unhandled exception occurred:\n\n{ex.Message}\n\n{ex.StackTrace}",
+                            CloseButtonText = "Close"
+                        };
+                    });
+                    // Ensure the app engine pauses long enough to read it
+                    AppDomain.CurrentDomain.SetData("UnhandledException", true);
+                }
+            };
 
             // Initialize ScottPlot Current Plot
             InitializeGraph();
@@ -242,7 +261,6 @@ namespace PicoPowerMonitor
             }
         }
 
-
         private void ReconnectTimer_Tick(object? sender, object e)
         {
             if (_picoPort == null || !_picoPort.IsOpen)
@@ -276,7 +294,6 @@ namespace PicoPowerMonitor
                 }
             }
         }
-
 
         private void SerialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
@@ -430,7 +447,6 @@ namespace PicoPowerMonitor
             // Initial plot paint
             CurrentSignaturePlot.Refresh();
         }
-
 
         public void NewHardwareDataReceived(double instantaneousCurrent)
         {
