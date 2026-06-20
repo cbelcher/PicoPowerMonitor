@@ -5,7 +5,8 @@ A high-performance, real-time hardware diagnostic and power-monitoring utility d
 
 ## Project is broken up into 4 sub-projects.
 
-
+  - PicoPowerMonitor - This Repo, it's the Windows 11 UI interface.
+ 
   - KiCAD Custom PCB Design (Project should be uploaded this weekend.)
   	
   - MicroPhython code to drive the hardware side of things.
