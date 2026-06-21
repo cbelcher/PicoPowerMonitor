@@ -11,7 +11,7 @@ A high-performance, real-time hardware diagnostic and power-monitoring utility d
   	
   - MicroPhython code to drive the hardware side of things.
 		    
-    - Repo: /RP2040PowerMonitor  (Direct line [here](https://github.com/cbelcher/RP2040PowerMonitor})
+    - Repo: /RP2040PowerMonitor  (Direct link [here](https://github.com/cbelcher/RP2040PowerMonitor})
         This is the project that runs on the RP2040-Zero.  Current MicroPython firmware 1.28.
       
 	
