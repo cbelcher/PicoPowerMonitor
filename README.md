@@ -12,15 +12,15 @@ A high-performance, real-time hardware diagnostic and power-monitoring utility d
   	
   - MicroPhython code to drive the hardware side of things.
 		    
-    - Repo: /RP2040PowerMonitor  (Direct link [here](https://github.com/cbelcher/RP2040PowerMonitor})
+    - Repo: /RP2040PowerMonitor  (Direct link [here](https://github.com/cbelcher/RP2040PowerMonitor))
         This is the project that runs on the RP2040-Zero.  Current MicroPython firmware 1.28.
       
 	
-  - FreeCAD 3D Printed Case Design. (Project should be uploaded this weekend.)
-
+  - FreeCAD 3D Printed Case Design. (Direct link [here](https://github.com/cbelcher/PicoPowerMonitor_FreeCAD))
+    
     - **Houses the custom PCB, using M3 threaded inserts and screws.**
 	
-    - **4 - 4 mm Female Banana jacks. 2 for PSU input and 2 to the device under test.**
+    - **4 - 4 mm Female Panel Mount Banana jacks. 2 for PSU input and 2 to the device under test.**
 
     - **8 - 5 x 2 mm magnets to secure lid to its base.**
    
