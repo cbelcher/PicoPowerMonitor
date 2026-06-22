@@ -66,6 +66,11 @@ Two Images to show the applications translucent effect.
 <img width="4032" height="3024" alt="Top with OLED Display" src="https://github.com/user-attachments/assets/dca643aa-f8da-4411-ba86-9a7e6f64c693" />
 </p>
 
+- OCP Tripped Alert Message
+<p align="center">
+<img width="4032" height="3024" alt="IMG_2825" src="https://github.com/user-attachments/assets/4bf2972e-275e-4cc9-aeae-07763dba0f1a" />
+</p>
+
 - Front with Dual 4 mm DUT banana jacks.
 <p align="center">
 <img width="4032" height="3024" alt="Front" src="https://github.com/user-attachments/assets/fd5922bc-aab0-42b5-a119-ecc8808b88b5" />
